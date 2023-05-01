@@ -1,0 +1,753 @@
+	#1 Intro ==============
+
+Laravel?
+= "Laravel is a web application framework with expressive, elegant syntax."
+
+Web Application Framework
+	+ Sebuah 'kerangka' yang di design untuk mendukung pembangunan aplikasi web
+	+ Menyediakan standar / cara untuk membuat aplikasi web
+	+ Bertujuan untuk mengotomasi hal hal umum yang biasanya dilakukan saat membangun aplikasi web
+	+ Contohnya : database library (koneksi ke database), templating engine, session management, authentication, security, dll
+
+Sejarah Laravel 
+> Dibuat oleh Taylor Otwell
+> Juni 2011
+> Sebagai alternatif framework selain CodeIgniter
+
+Filosofi Laravel
+= "We believe development must be an enjoyable, creative experience to be truly fulfilling." 	- Taylor Otwell
+
+Tujuan Laravel
+= "Laravel aims to make the development process a pleasing one for the developer without sacrificing application functionality. Happy developer make the best code." 	- Taylor Otwell
+
+Fitur utama pada Laravel
+	+ MVC
+	+ Template Engine
+	+ Artisan Console
+	+ Eloquent ORM (Berinteraksi dengan database)
+	+ Authentication & Authorization
+	+ Testing
+	+ Packaging System
+	+ Multiple File System
+	+ Task Scheduling
+	+ Websocket Programming
+
+Pre-Requisite
+	+ PHP dasar
+	+ Object Oriented Programming
+	+ Konsep MVC
+
+Reqirement
+	+ PHP v7.4/8 
+	+ MySQL
+	+ Composer 2 (Akan menginstal laravel menggunakan composer)
+	+ SequelPro / MySql Workbench
+	+ Terminal / CMD / PowerShell / GitBash
+	+ Code Editor
+	+ Web Browser
+	+ Ekstension
+		> PHP Intelephense
+		> Laravel Artisan
+		> Laravel Snippets
+		> Laravel Blade Snippets
+		> Laravel Blade Spacer
+		> Laravel Go To View
+	
+
+
+
+
+#2 Instalasi & Konfigurasi ==============
+
+Download dan Install 
+> Xampp 
+> Composer
+
+Membuat folder untuk menyimpan aplikasi Laravel
+Lokasi Folder : C:\LaravelApp
+
+Melakukan instalasi laravel menggunakan composer
+	"composer create-project laravel/laravel example-app"		-- Mendownload Laravel dari Repositori Laravel
+
+Menjalankan local development server laravel
+	"php artisan serve"
+
+
+Atau Install Laravel Secara Global
+
+Melakukan instalasi laravel secara global
+	C:/LaravelApp/ composer global require laravel/installer	-- Mendownload Laravel Instalasi Global
+	C:/LaravelApp/ laravel						-- Cek laravel env
+	
+	setting env
+	System variables >> Path (Edit) >> New (%USERPROFILE%\AppData\Roaming\Composer\vendor\bin)
+
+	C:/LaravelApp/ laravel new Coba-Laravel				-- Instal Laravel melalui Installer Global
+
+
+Laravel Valet
+packagist.org	>> cretueusebiu/valet-windows
+composer global require cretueusebiu/valet-windows			-- Instal Laravel/Valet Global
+valet install								-- Instal Valet
+
+Config DNS
+https://mayakron.altervista.org/support/acrylic/Windows10Configuration.htm
+
+Valet menggunakan port:8080 dimana sudah digunakan oleh xampp maka rubah port xampp agar tidak bentrok.
+Xampp >> Apache (Config) >> Apache (httpd.conf)
+ubah Listen 80 menjadi 			>> Listen 8080
+ubah ServerName localhost:80 menjadi 	>> ServerName localhost:8080
+
+Valet akan membuat configurasi server menjadi lebih mudah.
+Akan merubah semua folder yang ada di dalam C:/LaravelApp menjadi aplikasi laravel (tempat parkir valet).
+	C:/LaravelApp/ valet park					-- Sebagai tempat parkir Valet
+	C:/LaravelApp/ valet start 					-- Untuk Memulai Valet
+
+Sekarang Xampp akan menjadi localhost:8080
+
+
+
+
+
+#3 Struktur Folder, Routes & View ==============
+
+Lokasi MVC di Laravel 
+	> model tersimpan di app.
+	> views tersimpan di resources.
+	> Controllers tersimpan di app/http/Controllers.
+
+	+ routes berisi file file untuk routing atau penjaluran.
+	+ public tempat menyimpan asset asset statis (css, js, img).
+	+ resources, di dalamnya berisi folder css, js, img itu digunakan untuk system bundling.
+	+ .env file untuk menentukan environment dari aplikasi.
+
+Penjelasan :
+
+Membuat route sendiri untuk halaman Home, About, Blog dan membuat view awal untuk ketiga pagenya.
+Membuat file css di public (css/style.css). 
+	untuk langsung menghubungkan ke css cukup langsung panggil file css yg ada di public dengan menggunakan tag link di headernya.
+	Begitu pula dengan js dan img
+
+*Mengirimkan data di Routes	(mungkin saja data berubah dari user yg login)
+	mengirimkan data berupa array assosiatif karena mungkin saja data yang dikirimkan banyak.
+	dan lakukan pemanggilan data di dalam routesnya <?php echo $data... ?>
+
+
+
+
+
+#4 Blade Templating Engine ==============
+
+Templating Engine, adalah sebuah fitur atau tools untuk membantu dalam mengelola tampilan halaman web khususnya untuk sebuah framework. Laravel templating engine dengan nama -> Blade.
+
+Docs. Laravel.com >> The Basics >> Blade Templates
+
+Perbedaan pemanggilan dengan menggunakan Blade Template.
+PHP										Blade
+<?php echo $nama; ?> 					Hello, {{ $name }}.
+
+*Pemanggilan langsung menggunakan Blade Template otomatis ditambahkan syntax php htmlspecialchars().
+dan akan berjalan jika nama file ada bladenya
+
+Memberikan Navbar dari bootstrap.
+
+
+Docs. Laravel.com >> The Basics >> Blade Templates >> Extending a Layout
+
+child view extends ke file layout
+
+Membuat folder layouts
+Membuat file main.blade.php yang isinya sama dengan home
+	main.blade.php akan menjadi layout utamanya, yang nantinya di dalam layout utamanya yg berbeda hanya isi dari containernya saja.
+	dengan memberikan @yield('container') 
+	yg artinya adalah main.blade.php akan menjadi halaman utama berisi header, footer dan container. Di dalam containernya akan berisi dari container home, about, ataupun blog.
+	agar container utama dapat berisi dari container childnya maka main.blade.php akan menjadi parentnya.
+	misalkan : <div class="container">
+					@yield('container')
+				</div>
+
+				artinya di dalam main.blade.php itu akan berisi container dari halamannya.
+
+	dan untuk childnya dapat langsung melakukan seperti berikut
+				@section('container')
+					<h1>Hello, WorldQ</h1>
+				@endsection
+
+				*Maka di halaman main.blade.php akan menggantikan isi dari containernya dengan container childnya.
+
+	Namun untuk dapat menentukan yield dan sectionnya. Jangan lupa untuk memanggil tag utamanya yaitu @extends('misalkan : layout/header') di awal code childnya.
+
+
+Membuat folder baru untuk memindahkan isi kontent kontent spesifik (misalkan. Navbar)
+Maka nanti di file main.blade.php akan memisahkan navbar menjadi sebuah kontent terpisah.
+untuk memanggilnya dapat dilakukan dengan include('partials/navbar')
+
+Kenapa include? 
+	Karena kita akan memanggil navbarnya.
+	Jika extends itu child akan melakukan inheritance pada file parentnya.
+
+
+Akan mengirimkan data agar halaman menjadi dinamis, misalkan halaman home nama page headnya home, dan yang lainnya.
+Membuat navbar text lebih terang ketika sedang di page tertentu.
+
+	<a class="nav-link {{ ($title === "Halaman Home")? 'active' : '' }}" href="/">Home</a>
+
+	maka jika $judul sama dengan "..isi judul.." ? berikan text active : jika tidak maka jangan beri class active
+
+
+Di halaman web.php sementara membuat $blog_post sebagai data pengganti dari database.
+dan ceritanya data sementara tersbut akan dipakai di halaman blog dengan mengirimkan isi dari $blog_post
+
+exert, menampilkan kontent hanya sedikitnya ketika di klik maka akan berpindah ke halaman dengan page yang berisi data lengkapnya.
+slug, adalah versi lain dari title. Biasanya merubah judulnya jadi huruf kecil semua dan setiap spasinya diganti dengan menggunakan dash. slug juga tidak boleh memiliki nama yang sama karena akan menjadi sebagai penanda.
+
+* WildCard untuk mengambil apapun isi dari slashnya
+Route::get('posts/{slug}');
+
+Membuat file dan route untuk slug yang akan menampilkan data informasi lebih lengkap dari sebuah content.
+Dimana route tersbut akan menerima data dari url.
+
+
+
+
+
+#5 Model, Collection & Controller ==============
+
+Proses yang dilakukan sebelumnya kita memanggil halaman data dan proses di dalam sebuah route secara bersamaan dan itu kurng tepat. Pada eps ini akan memisahkan komponennya.
+
+Akan memperbaiki data sementara, agar seolah olah sebuah model data dari database.
+Maka nanti akan ada model berupa class di dalam code kita, yang class ini nanti bisa dipetakkan ke dalam tabel. Maka akan dengan mudah memanipulasi table (Insert, Update, Delete).
+
+Membuat Model
+	* php artisan make:model (Nama_Model)
+
+	Membuat model menggunakan Exstension Laravel Artisan.
+	CTRL + SHIFT + P >> ketik Artisan (Pilih Artisan:Make Model)
+
+	Masukkan nama model, dan karena di eps ini lebih menjelaskan kepembuatan model maka untuk controller, migration, factori untuk 'NO' terlebih dahulu.
+
+	Jika sudah maka akan ada file models di App >> Models
+
+
+Selanjutnya akan memindahkan data sementara di halaman post ke dalam sebuah models >> Post yang akan mengelola data untuk halaman /blog
+
+Ekstension untuk mengelola namespace atau pemanggilan seperti (use App\Models\Post)
+Exs : PHP Namespace Resolver
+maka daripada menuliskan use ...\...\... secara manual maka dengan exstension ini kita hanya cukup klik kanan dan Import All Class
+
+Halaman Models akan berisi sebuah class dan method yang akan dipakai untuk routesnya. Karena routes akan memanggil data dari model dan memanggil tiap method yang ada di dalamnya.
+
+
+Selanjutnya akan merubah data yang diambil menjadi sebuah Collections di dalam Laravel.
+Apa itu Collections ?
+	Collections sebetulnya adalah pembungkus untuk sebuah array, yang akan membuat array menjadi lebih sakti.
+	Nah jadi array yang asalnya biasa dengan membuatnya 
+	sebagai collcetion maka akan dapat memanggil fungsi dari laravelnya.
+
+	Kenapa harus dijadikan Collections?
+	karena misalkan kita akan menggunakan fungsi first (untuk mencari element yang pertama).
+
+	Membungkus dengan Collections
+        * return collect(self::$blog_posts);
+
+
+Controllers
+Apa itu controllers? 
+	Singkatnya daripada mendefinisikan semua logic di dalam sebuah closure, di dalam route file kita dapat merapihkannya menggunakan class Controller. Controller bisa menggabungkan atau mengelompokkan request yang serupa yang saling terkait untuk menangani logic ke dalam sebuah class. Misalnya kita akan membuat sebuah class untuk menangani dan mengelola postingan itu cocok untuk 1 controller.
+		
+		closure adalah 
+		.., function () {
+			return view('home', [
+				"title" => "Halaman Home",
+			]);
+		... 
+
+	Jika menggunakan controllers kita tidak lagi menggunakan closure cukup menuliskan	
+		* Route::get('/user/{id}', [UserController::class, 'show']);
+
+	Cara membuatnya dapat menggunakan artisan atau menggunakan exs Laravel Artisan
+	CTRL + SHIFT + P >> Pilih Artisan: Make Controller >> (nama Controller) >> Pilih Basic
+
+
+Migration adalah untuk menuliskan skema database dan akan nanti akan menggenerate tabel di dalam database nya.
+
+
+
+
+
+#6 Database, Migration & Eloquent ==============
+
+Akan bekerja menggunakan database di dalam Aplikasi Laravel.
+
+Laravel.com >> Environment Configuration
+file .env untuk melakukan setting pada lingkungan pengembangan di dalam aplikasi.
+
+.env						= adalah variabel yang digunakan untuk aplikasi
+.env example				= adalah template .env
+
+Penjelasan .env
+APP_NAME					= Nama dari aplikasi.
+APP_ENV						= jika local artinya masih pada tahap pembangunan.
+							  jika development maka sudah di tahap development dan tidak akan menampilkan pesan error.
+APP_KEY						= Key dari aplikasi yang otomatis dibuat ketika create laravel.
+APP_URL						= url untuk aplikasi.
+
+DB_CONNECTION=mysql			= menentukan konfigurasi database dari aplikasi, secara default koneksi ke mysql.
+DB_HOST=127.0.0.1			= default localhost
+DB_PORT=3306				= default port
+DB_DATABASE=wpu_laravel		= nama database yang akan digunakan
+DB_USERNAME=root			= nama username
+DB_PASSWORD=				= password
+
+
+Membuat database wpu_laravel
+untuk membuat tabel, ada cara dengan menggunakan laravel yaitu migration.
+
+Laravel.com >> Database:Migration
+
+Migration itu layaknya version control seperti git.
+Migration dapat melacak perubahan pada codingan kita, migration ini untuk melacak perubahan yang tejadi pada database lewat codingan Laravel, yang memungkinkan kita dan tim untuk mendefinisikan serta mendistribusikan / membagikan struktur dari database.
+Jadi struktur tabelnya tidak dibuat lagi di database, tapi dibuat menggunakan codingan (lewat class yang ada di dalam laravel).
+
+Caranya dapat menggunakan Artisan
+	* php artisan make:migration create_mahasiswa_table
+
+	Secara default laravel juga sudah memiliki beberapa file migration
+		yaitu (create_user_table, create_password_reset_token_table, create_failed_jobs_table, create_personal_access_tokens_table)
+
+	Menjalankan migrasi 
+	* php artisan migrate
+		nanti semua file migrasinya (file migrasi default laravel juga) akan dieksekusi untuk menjadi sebuah tabel.
+
+Di dalam migration pasti ada 2 buah method yaitu up() dan down()
+	up()	digunakan ketika kita akan membuat schema(struktur tabel) atau isi table dari database.
+	down()	digunakan ketika kita akan menghilangkan Schema yang telah dibuat.
+			Perintah php artisan untuk down()
+				* php artisan migrate:rollback	
+				maka semua migration akan menjalankan fungsi down() dan semua tabel dari databasenya akan dihapus.
+
+
+				* php artisan migrate:fresh
+				maka akan melakukan migrate:rollback dan migrate sekaligus.
+				biasanya ketika kita akan mengubah schema dari tabel.
+
+Nambahin atau merubah schema / cara membuat dan nambahin table
+Laravel.com >> Database:Columns
+Berisi tipe data yang dipilih
+
+Untuk menambah data di dalam MySQL Workbench
+Klik kanan pada tabel >> Select Rows >> Form Edior
+
+Akan mengisi data tanpa mengisikannya di MySQL Workbench dengan menggunakan Eloquent di Laravel
+Laravel.com >> Eloquent
+Eloquent ORM. Apa itu ORM?
+	ORM (Object Relational Mapper), adalah sebuah fungsi untuk memetakkan tiap tiap data yang ada di dalam tabel atau database nanti ke dalam sebuah object. Saat menggunakan Eloquent ini setiap tabel di dalam database kita itu berkorespondensi atau terhubung ke dalam sebuah model yang dapat kita gunakan untuk berinteraksi dengan tabel. Jadi di dalam aplikasi dan database ada perantara yang namanya model. Selain dapat mengambil record atau data data dari database, Eloquent ini memungkinkan kita juga untuk melakukan CRUD ke dalam tabel lewat codingan.
+
+	Dan ORM ini bisa terjadi karena Active Record Pattern. Sebuah pendekatan untuk mengakses data di dalam database, jadi tabel di dalam database dibungkus menjadi sebuah class. Jika ada class yang merepresentasikan tabel maka setiap data / row itu terhubung terhadap instance classnya(object)
+
+	Cara Melakukan ORM
+	menggunakan tinker
+
+	* php artisan tinker
+	  $user = new App\Model\User;
+	  $user->name = "Luthfi Nur Ramadhan";
+	  $user->email = "luthfiramadhan.lr55@gmail.com";
+	  $user->password = bcrypt("Luthfi Nur Ramadhan");
+
+	  dengan menuliskan code tersebut kita telah menambahkan sebuah object, namun belum tersimpan ke database dan harus melakukan ServerName
+	  $user->save()
+
+	  Jika telah di save maka akan ada baris baru data di dalam tabel user, Tanpa harus menginputkan di databasenya.
+
+	Melihat isi datanya menggunakan tinker
+	$user->all()
+
+	menggunakan function Collection, misalkan
+	$user->first()					= menampilkan data pertama
+	$user->find(2)					= mencari berdasarkan id
+	$user->findOrFail(20)			= mencari berdasarkan id jika id tidak ada maka akan menampilkan exception (model not found)
+	$user->pluck('title')			= mencari dan menampilkan judulnya saja
+
+	Untuk keluar dari laravel tinker cukup dengan CTRL + C
+
+
+
+
+#7 Post Model ==============
+
+Membuat model dengan merepresentasikan model sebagai class dari database.
+
+Model Post
+Hapus model Post sebelumnya dan membuat Model Post Baru.
+
+Membuat model
+	* php artisan make:model
+Membuat migration (scheme table)
+
+agar membuat keduanya sekaligus
+	* php artisan make:model -m Post			= maka akan dibuatkan 2 buah file (models dan migration)
+
+Membuat isi tabel apa saja di dalam migrasi Post dan menambahkannya ke database.
+Mengisikan datanya menggunakan tinker.
+
+Lalu sedikit perubahan di post.blade dan posts.blade dan juga mengganti dari asalnya notasi array menjadi notasi object.
+
+Jika di dalam body data kita ingin memberikan tag html di dalamnya misalkan <p>....</p>
+maka jika di dalam laravel kita menggunakan pemanggilan menggunakan blade template {{ ... }}
+itu tidak akan bisa karena laravel akan mengamankan isi data dengan di dalamnya menjalankan fungsi htmlspecialchars.
+Agar jika ada tag html di dalam database dan ingin tetap menampilkannya dengan menggunakan {!!  !!}
+
+Ada cara lain untuk mengisikan data ke databasenya dengan cara
+	* App\Models\Post::create([
+		'title' => "...",
+		'excerpt' => "...",
+		'body' => "...",
+	])
+
+	namun itu tidak akan bisa di jalankan langsung di tingker karena secara default laravel tidak mengizinkan kita untuk mengisikan data banyak secara langsung. Agar dapat bisa melakukannya dengan menambahkan fillable di Model Post.
+	Jika sudah reset tingkernya terlebih dahulu CTRL + D (Keluar dan masuk lagi ke tinker)
+
+
+	Ada Juga kebalikan dari fillable yang tidak perlu memasukkan satu persatu field mana yang ingin diisi.
+	karena $guarded itu adalahan field yang tidak boleh diisi.
+
+	Misalkan jika ingin merubah data
+	* App\Models\Post::find(3)->update(['title' => 'Judul Ketiga Baru'])
+
+	cara lain mengedit
+	* App\Models\Post::where('title', 'Judul Ketiga Update')->update(['excerpt' => 'excerpt postingan ke tiga berubah'])
+
+
+Route Model Binding
+Laravel.com >> Route Model Binding
+	Fitur laravel route model binding yang tugasnya mengskip apa yang dilakukan, misalnya mencari query data berdasarkan id di dalam route atau controllernya melakukan query cari post yang idnya berapa ... . 
+	
+	Biasanya itu kita akan query record yang kita cari berdasarkan id. Nah... Laravel dengan Route Model Binding Laravelnya akan mengskip apa yang dilakukan tadi dan akan melakukan langsung query supaya dapat langsung data sesuai dengan apa yang dibutuhkan. Tanpa harus cari berdasarkan id dan query, dengan route model binding itu akan dilakukan secara otomatis.
+
+	Cara nya jika kita mencari sesuatu biasanya /user/{id}
+	Nah sekarang dengan menggunakan route model binding kita hanya panggins instancenya. Jika kita kirimkan user maka cukup /user/{user_name}
+	Tapi di dalam functionnya diberikan parameternya langsung kasih type hintingnya.
+	Kita lansung kasih tipedatanya bahwa dia itu adalah model yang namanya User
+	
+	Contoh
+		* Route::get('posts/{user_name:user}, function( Post $user_name))
+		atau
+		* Route::get('posts/{post:slug}, function( Post $post))
+
+	$user_name itu keduanya harus sama persis
+
+	Di dalam Controllernya kita sudah tidak membutuhkan id karena bisa langsung memanggil modelsnya
+
+	Contoh	:
+			public function show($id){
+				return view('post', [
+					"title" => "Halaman Single Post",
+					"post" => Post::find($id)
+				]);
+			}
+
+		Karena kita akan melakukan Route Model Binding maka kita tidak akan mencari berdasarkan id.
+		Karena kita dapat langsung melakukan query tanpa harus berdasarkan id
+		Dengan cara berikut
+
+			public function show(Post $post){
+				return view('post', [
+					"title" => "Halaman Single Post",
+					"post" => $post
+				]);
+			}
+
+		Di dalam Route kita mengirimkan data $post dan akan ditangkap oleh model Post. Agar dapat ditangkap kita membuat parameter di dalam function shownya memiliki keterikatan dengan Model Post dimana model post hanya memiliki parameter yang tidak boleh diisi yaitu $id. Oleh karena itu id akan dibuat secara otomatis oleh Modelsnya dan di dalam method view kita menerima parameter $post dan akan mengembalikan sebuah $post baru berdasarkan $post yang ditangkap sebagai parameter.
+
+		Hal ini memungkinkan kita untuk mengirimkan data bukan lagi berdasarkan id karena jika id bisa saja gampang ditebak.
+
+		Cara Pakainya gimana agar tidak berdasarkan id?
+		Nah di dalam migrasi misalkan kita membuat baris data baru dengan nama slug dan diberikan function unique() karena sebagai pembeda bahwa baris ini unik dan tidak akan sama
+
+		Contoh 	
+            * $table->string('slug')->unique();
+		
+		Nah jadi di dalam routenya itu akan mengirimkan data parameter yaitu $post yang memanggil slug karena setiap slug akan berbeda satu sama lain. Kemudian akan ditangkap oleh Controllernya dan controller akan mengisikan post dengan data dari $post yang baru
+		Maka di halaman index (blade) kita cukup panggil si post yang sudah diisikan dengan data baru beserta apa yang ingin dipanggilnya.
+
+		Penjelasan "post" => $post
+		"post" akan diisi oleh $post yang berisi (id, title, slug, excerpt, body, published_at)
+		nah si blade memanggil si "post" dengan cara laravel yaitu menggunakan $post
+		dan apa yang ingin ditampilkannya
+
+		misalkan <h1>{{ $post->title }}</h1> 
+		maka akan menampilkan judulnya saja dari data yang sudah ada
+
+	Cara membuatnya lihat di Route, PostController, Model Post dan juga kita akan menambahkan slug untuk migrasinya.
+	karena data akan di migrate:fresh maka kita akna mengisikan datanya lagi di php artisan tinker
+
+	App\Models\Post::create([
+		'title' => "...",
+		'slug' => "...",
+		'excerpt' => "...",
+		'body' => "...",
+	])
+	
+	setelah itu agar yang dikirimkan bukan lagi id tetapi slug. agar dapat mencarinya slug ubah di posts menjadi slug ketika user mengklik. lalu ubah routes 
+		* Route::get('posts/{post:slug}', [PostController::class, 'show']);
+
+		jadi yang sebelumnya where id = ...
+		sekarang menjadi slug = ... cukup merubah menjadi post:slug
+
+
+
+
+
+#8 Post Category & Eloquent Relationship ==============
+
+Keterhubungan antar tabel / model.
+
+Akan menambahkan category pada postingan di blog.
+Langkah pertama akan membuat model dan migrasi dari kategory
+	* php artisan make:model -m Category
+
+
+Lalu buat schema untuk category (id, name, slug).
+agar ada keterikatan antara Post dan Category di dalam Post harus ada Foreign Key
+    * $table->foreignId('category_id');						untuk foreign key antara post dan category
+	Lalu lakukan migrate:fresh
+
+Lalu isi beberapa kategory dengan tinker
+    * App\Models\Category::create([
+      'name' => "Personal",
+      'slug' => "personal"
+      ])
+
+	* App\Models\Category::all()
+	
+
+Lalu isi juga beberapa post dengan tinker
+	*  App\Models\Post::create([
+		  	'title' => "...",
+			'category_id' => 4,
+			'slug' => "....", 
+			'excerpt' => "...",
+			'body' => "..."
+		])
+
+	* App\Models\Post::where('category_id', 1)->get()
+
+Nah akan lebih bagus jika kita langsung tau nama categorynya, karena sekarang ini masih berupa id. 
+Untuk mencari namanya jika menggunakan SQL biasa itu kita harus melakukan JOIN antara tabel 1 & 2.
+jika ingin melakukan itu di laravel kita harus menentukan Relationship antar modelnya.
+
+Laravel.com >> Eloquent:Relationship
+Tabel di dalam database itu biasanya berelasi satu sama lain.
+Contohnya misalkan jika membuat system blog post mungkin saja bisa memiliki banyak komentar.
+1 Post bisa punya banyak Komentar.
+Nah Komentar ini selain berelasi dengan Post pasti juga berelasi dengan siapa yang menuliskannya(user), maka akan berkemungkinan juga ada relasi dengan User.
+Maka post dapat berelasi dengan komentar dan bisa berelasi dengan user juga.
+
+Tabel Relationship
+Kita tahu sekarang sudah memiliki table Post dan akan menghubungkan dengan tabel Kategory
+Nanti setiap Post akan memiliki kategory.
+
+Menghubungkan dari data definisi dengan menambahkan  data sebuah catergory_id ☆
+dengan menambahkan foreign key maka tabel kategory bisa berelasi dengan tabel Post
+
+Hubungan antar tabel 1 Category bisa memiliki banyak Post (One to Many)
+Hubungan antar kebalikan tabel 1 Post hanya memiliki 1 Category (One to One)
+
+Jika dalam sebuaht tabel ingin memiliki 2 buah category atau lebih maka sebaiknya menggunakan fitur tags.
+
+Category hasMany Post
+Post BelongsTo Category
+
+Post {												Categories {
+	id ★												id ★
+	category_id ☆										name
+	title												slug
+	slug												}
+	excerpt
+	body
+	published_at
+}
+
+Contoh Relationship 2
+
+Post ke User itu (One to One) BelongsTo
+	*Karena 1 Postingan dimiliki oleh 1 user saja
+User ke Post itu (One to Many) hasMany
+	*Karena 1 User bisa memiliki banyak Postingan	
+
+Post {												Users {
+	id ★												id ★
+	category_id ☆										name
+	user_id	☆	     									username
+	title												 password
+	slug											 }
+	excerpt
+	body
+	published_at
+}
+
+Contoh Relationship 3
+
+1 Post hasMany Comments (One to Many)	 -- 1 post memiliki banyak komen
+1 Comments BelongsTo 1 Post (One to One) -- 1 comment pasti ada di 1 postingan
+1 Comments BelongsTo 1 Users (One to One)-- 1 Comments pasti ditulis oleh 1 User
+1 Users hasMany Comments (One to Many)   -- 1 User bisa saja memiliki banyak comment 
+
+Post {									Comments{							Users{
+	id ★									id ★								id ★
+	category_id ☆							post_id	☆							name
+	user_id	☆	     						user_id	☆							username
+	title									body								password
+	slug									...									}
+	excerpt									}
+	body
+	published_at
+}
+
+Jika ingin menghubungkan models Post dengan models Category maka di dalam models Post kita akan membuat sebuah method baru (nama methodnya sama dengan nama modelnya).
+    * return $this->belongsTo(Category::class);
+
+Cara cek keterhubungannya di tinker
+	* php artisan tinker
+	  $post = App\Models\Post::first()
+
+	  $post->category
+	  		ini akan memanggi method yang BelongsTo(Category::)
+			dan ini akan otomatis dicarikan kategory yang sesuai.
+			Maka dari post yang pertama karena category_idnya 1 maka ia akan mendapatkan seluruh instance dari tabel category
+	  $post->category->name
+	  		dengan menuliskan itu kita bisa tau nama kategorinya
+
+
+Maka tambahkan di post.blade.php untuk memanggil category
+        * <p class="mb-5">By. Izuchii in {{ $post->category->name }}</p>
+
+		untuk membuat si category menjadi sebuah link dan jika di klik akan menampilkan post post dengan kategori yang sama
+	        *  <p class="mb-5">By. Izuchii in <a href="/categories/{{ $post->category->slug }}">{{ $post->category->name }}</a></p>
+
+		Lalu buat route nya (untuk sementara masih menggunakan function(){...}
+
+			Route::get('categories/{category:slug}', function(Category $category){
+				return view('category', [
+					"title" => "Kategory" . $category->name,
+					// 1 kategory bisa punya banyak post
+					"posts" => $category->posts,
+					"category" => $category->name
+				]);
+			});)
+
+
+		Selanjutnya buat view untuk halaman category
+		dan jangan lupa untuk menambahkan method post di Category sebagai 1 to Many
+		    public function posts(){
+				return $this->hasMany(Post::class);
+			}	
+
+		kita dapat mengeceknya juga dengan tinker
+			* $category = App\Models\Category::first()
+			* $category->posts
+
+
+	Terakhir membuat route untuk view Categories yang akan menampilkan semua kategori yang ada.
+
+
+
+
+#9 Database Seeder ==============
+
+Akan melakukan relasi dari tabel Post dan User. Karena nanti akan ada perubahan schema pada tabel yang membuat data akan menjadi kosong kembali. Itu akan ribet jika kita menggunakan artisan tinker karena harus memasukan data secara berulang. Maka sekarang akan menggunakan fitur dari laravel yaitu Seeder dan Factory agar dengan mudah mempopulasi atau mengisikan data secara otomatis ketika melakukan migrasi.
+
+Apa itu Seeder dan Bagaimana Cara Menggunakannya?
+laravel.com >> Database: Seeding
+
+	Sebelumnya, melakukan editing pada tampilan untuk halaman posts.
+	Dan di dalam migrasinya menambahkan foreign key user_id untuk ke tabel Users
+	Dan data pun akan dihapus lagi ketika melakukan migrate
+
+	Seeding, seperti menyemai benih (bisa mengisi otomatis tabel kita ketika dibuat).
+	Seeding memiliki kemampuan untuk melakukan seed di dalam database dengan data testing. Caranya dengan menggunakan class seed. Jadi setiap model dapat membuat class seed nya dan disimpan di folder database/seeders.
+
+	Untuk membuatnya dengan mengetikkan
+		* php artisan make:seeder UserSeeder
+
+	Atau dapat dengan membuat factories yang akan dijelaskan di episode berikutnya, sebagai pabrik pembuat data (yang akan membuat seedingnya secara otomatis).
+
+	Membuat seeder secara manual ada di DatabaseSeeder.php
+	untuk menjalankannya ketikkan
+		* php artisan db:seed
+
+		jika ingin menambahkan seed baru biasanya melakukan migrate:fresh lalu melakukan db:seed lagi
+		agar lebih cepat melakukan keduanya bersamaan
+		* php artisan migrate:fresh --seed
+
+		Jika ingin menampilkan siapa yang mengeditnya dengan mengambil data dari seedernya, maka dengan cara menghubungkan $post->user->name
+		Menghubungkan antara model Post dan User dengan membuat method baru user dan posts di masing masing keterhubungan methodnya.
+
+
+
+
+
+#10 Factory & Faker ==============
+
+Akan menggunakan fitur Factory ketika kita akan membuat banyak data sekaligus secara otomatis yang nantinya dijadikan sebagai data di dalam seeder. Yang dimana sebelumnya menambahkan data secara manual di dalam file seedernya.
+Akan juga menggunakan sebuah library Faker untuk membuat data kita otomatis terisi dengan data palsu yang masuk akal secara random.
+
+Factory adalah sebagai pabrik pembuat data.
+Di dalam setiap model pasti ada 
+	* use hasFactory;
+		yang secara default sudah ada dan bisa membuat factorynya.
+
+
+laravel.com >> Eloquent:Factories
+Akan membahas Eloquent Model Factories, Pada saat pengujian kita mungkin saja atau bahkan pasti butuh menambahkan data baru ke dalam database sebelum menambahkan test. Daripada kita secara manual mengisikan datanya di setiap column nya, Laravel itu memungkinkan kita mengdefinisikan sebuah factory ke dalam model kita.
+
+Untuk melihat bagaimana cara kerjanya dapat melihat
+	database\factories\UserFactory.php
+
+	Merubah faker agar menjadi bahasa Indonesia
+		di config\app.php
+	    *  'faker_locale' => env('FAKER_LOCALE', 'en_US'),
+
+		lalu menambahkan di env nya
+		*  FAKER_LOCALE=id_ID
+
+	Membuat data usernya tidak akan menggunakan seeder secara manual tetapi akan menggunakan factory.
+	cara nya dengan menuliskan code	di DatabaseSeedernya
+        *  \App\Models\User::factory(5)->create();
+		lalu php artisan migrate:fresh --seed
+		
+		Maka nanti akan diisikan data user yang dibuat secara random
+	
+	Selanjutnya kita akan membuat factory untuk Post dan Category.
+		* php artisan make:factory PostFactory
+
+		Di dalamnya kita membuat seeder otomatis menggunakan faker. (namun untuk user_id dan category_id agak sedikit tricky)
+		karea untuk sementara tahu user akan dibuat 5 dan kategori akan dibuat 3 maka sementara menggunakan fungsi mt_rand
+		jika sudah lakukan kembali
+		* php artisan migrate:fresh --seed
+
+		Cara cepat membuat Models dengan migrasinya dan seeder dan factory dengan menuliskan
+		* php artisan make:model Student -mfs
+
+	
+	Tujuan selanjutnya kita akan membuat nama user dapat di klik.
+	Dengan membuat route baru untuk authors
+
+
+
+
+
+
+#11 N + 1 ==============
+
+N + 1 Problem, erat kaitannya dengan relasi dan query yang dilakukan di dalam aplikasi.
+
+Apa itu N + 1 Problem dan bagaimana cara mengatasinya ?
+
+Akan menghapus view untuk kategori dan menyatukannya di dalam view Posts.
+
+	N + 1 Problem ini terjadi ketika aplikasi kita mengambil data dari database dimana di dalamnya kita melakukan looping terhadap data. Sehingga yang harusnya memanggil data hanya 2 query misalkan, ini melakukan pemanggilan query keseluruhan secara berulang ulang.
+
+	Misalkan di dalam Posts itu melakuakn 1 query untuk mengambil semua postingan untuk data post, namun karena di dalamnya ada tabel lain (author dan category) maka yang terjadi akan melakukan query lagi yang berulang di dalam looping. Dan itu terjadi setiap content post nya (mksd ambil penulis dan kategory, lalu post 2 ambil penulis dan kategori, hingga semuanya terpenuhi)
+
+	Maka di halaman yang tejadi looping laravel melakukan lazy loading (loadingnya malas / ketika dibutuhkan).Dan dapat menggunakan library laravel yaitu clockwork, yang nantinya akan dihubungkan ke sebuah ekstension di browser untuk mengetahui sebeenarnya aplikasi PHP melakukan pemanggilan query berapa kali. Untuk mengecek performancenya
