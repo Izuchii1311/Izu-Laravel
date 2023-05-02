@@ -802,3 +802,18 @@ Akan menghapus view untuk kategori dan menyatukannya di dalam view Posts.
 				*  "posts" => $user->posts->load('category', 'user')
 
 				lakukan juga untuk kategory dengan hal yang sama
+
+
+
+
+
+#12 Redesign UI
+
+Akan menggunakan Bootstrap dan API dari layanan Unsplash sebagai penyedia gambar.
+
+
+
+
+
+
+#13

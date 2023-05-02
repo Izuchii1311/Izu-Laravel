@@ -21,7 +21,8 @@ use App\Http\Controllers\PostController;
 Route::get('/', function () {
     $title = "Home";
     return view('home', [
-        "title" => $title
+        "title" => $title,
+        "active" => "home"
     ]);
 });
 
@@ -32,6 +33,7 @@ Route::get('/posts/{post:slug}', [PostController::class, 'show']);
 // Route About
 Route::get('/about', function () {
     return view('about', [
+        "active" => "about",
         "title" => "About",
         "name" => "Izuchii",
         "email" => "luthfiramadhan.lr55@gmail.com",
@@ -41,9 +43,19 @@ Route::get('/about', function () {
 });
 
 // Route Category
+Route::get('/categories', function(){
+    return view('categories', [
+        "title" => "Kategori",
+        "active" => "categories",
+        "categories" => Category::All(),
+    ]);
+});
+
 Route::get('/categories/{category:slug}', function(Category $category){
     return view('posts', [
         "title" => "Category : " . $category->name,
+        "active" => "categories",
+        // Method with (N+1 Problem Lazy Eager Loading)
         "posts" => $category->posts->load('category', 'user')
     ]);
 });
@@ -53,6 +65,8 @@ Route::get('/authors/{user:username}', function(User $user){
     return view('posts', [
         "title" => "Semua Postingan oleh " . $user->username,
         "username" => $user->username,
+        "active" => "posts",
+        // Method with (N+1 Problem Lazy Eager Loading)
         "posts" => $user->posts->load('category', 'user')
     ]);
 });
