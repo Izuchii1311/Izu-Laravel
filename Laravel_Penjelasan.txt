@@ -746,8 +746,59 @@ Apa itu N + 1 Problem dan bagaimana cara mengatasinya ?
 
 Akan menghapus view untuk kategori dan menyatukannya di dalam view Posts.
 
-	N + 1 Problem ini terjadi ketika aplikasi kita mengambil data dari database dimana di dalamnya kita melakukan looping terhadap data. Sehingga yang harusnya memanggil data hanya 2 query misalkan, ini melakukan pemanggilan query keseluruhan secara berulang ulang.
+	N + 1 Problem ini terjadi ketika aplikasi kita mengambil data dari database dimana di dalamnya kita melakukan looping terhadap data. Sehingga yang harusnya memanggil data hanya 2 query (query ke semua dan query ke data yang dicarinya), ini malah melakukan pemanggilan query keseluruhan secara berulang ulang.
 
-	Misalkan di dalam Posts itu melakuakn 1 query untuk mengambil semua postingan untuk data post, namun karena di dalamnya ada tabel lain (author dan category) maka yang terjadi akan melakukan query lagi yang berulang di dalam looping. Dan itu terjadi setiap content post nya (mksd ambil penulis dan kategory, lalu post 2 ambil penulis dan kategori, hingga semuanya terpenuhi)
+	Misalkan di dalam Posts itu melakuakn 1 query untuk mengambil semua postingan untuk data posts, namun karena di dalamnya ada tabel lain (author dan category) maka yang terjadi akan melakukan query lagi yang berulang di dalam looping. Problemnya adalah setiap kita melakukan query untuk mengecek authornya siapa itu dia melakukan pemanggilan terhadap database, looping author dia connect ke database query lagi ke database, mau manggil kategory dia query lagi. Padahal harusnya query yang dilakukan itu cuma 3 (1. ambil semua posts, 2. Ambil semua author 3.ambil semua kategory) tapi ternyata tidak 3x, yang terjadi ambil semua postingan, dimana setiap loopingnya ambil penulis dan ambil kategory, itu hanya untuk 1 post, untuk post berikutnya melakukan hal yang sama berulang. 
 
-	Maka di halaman yang tejadi looping laravel melakukan lazy loading (loadingnya malas / ketika dibutuhkan).Dan dapat menggunakan library laravel yaitu clockwork, yang nantinya akan dihubungkan ke sebuah ekstension di browser untuk mengetahui sebeenarnya aplikasi PHP melakukan pemanggilan query berapa kali. Untuk mengecek performancenya
+	Ini yang dimaksud N + 1 Problem ketika aplikasinya masih kecil maka querynya tidak akan terasa, tetapi jika sudah banyak maka akan makin lambat. Yang terjadi ini sudah secara default oleh laravel ketika kita memiliki relationship.
+
+	Maka di halaman yang tejadi looping laravel melakukan lazy loading (loadingnya malas / ketika dibutuhkan).Dan dapat menggunakan library laravel yaitu clockwork, yang nantinya akan dihubungkan ke sebuah ekstension di browser untuk mengetahui sebenarnya aplikasi PHP melakukan pemanggilan query berapa kali. Untuk mengecek performancenya
+
+
+	Library yang akan diinstall
+		https://github.com/itsgoingd/clockwork
+
+	Dan akan dihubungkan ke sebuah esktension di browser 
+	Untuk mengetahui sebenernya aplikasi laravel kita melakukan query berapa kali, untuk mengecek performancenya.
+
+	Install clockwork	
+		* composer require itsgoingd/clockwork
+
+		jika sudah selesai kita install ekstension clockwork di browsernya
+		untuk mengeceknya ada ketika di inspect menu clockwork lalu untuk melihat querynya pilih menu database maka akan tampil query query yang dilakukannya. Dan maka akan tampil query yang sangan banyak dan juga bisa kita persingkat querynya.
+
+		Yang akan kita lakukan adalah Eager Loading (Semangat) kebalikan dari lazy loading. Lazy itu lakukan saja ketika dibutuhkan, tetapi jika eager loading lakukan semuanya di awal sehingga kita sudah mempunyai datanya sehingga pada saat looping nanti tidak perlu melakukan pemanggilan data ke database lagi.
+
+		Jika ada yang melakukan belongsTo hasMany maka modelnya akan melakukan lazy loading. Artinya data relationshipnya tidak di load atau dipanggil sampai nantinya kita mengakses propertynya pada saat dilooping. 	
+
+		Menggunakan Eager loading dengan menambahkan method with di controllernya.
+		maka yang asalnya di PostController.php
+
+            * "posts" => Post::latest()->get()
+
+			menjadi
+            
+			* "posts" => Post::with(['user', 'category'])->latest()->get()
+			 
+			jadi saat looping sekalian looping juga dengan user dan category diawal looping semua datanya
+
+			maka dengan cara ini membuat pemanggilan querynya hanya menjadi 3.
+
+
+			Dan lakukan juga untuk author namun caranya aga beda, karena menggunakan route model binding di routenya. Ada teknik lain dan tidak menggunakan cara Eager Loading.
+			Dengan cara Lazy Eager Loading.
+
+			https://laravel.com/docs/10.x/eloquent-relationships#lazy-eager-loading
+
+			jadi digabung lazy dan eager loading, kadang kadang kita butuh melakukan eager loading pada relationship kita tapi ketika si parentnya sudah di dapatkan, jadi ga sekalian diambil karena kita sedang melakukan route model binding. kita tidak memakai with() tetapi memakai load().
+			Jadi ketika panggil si authornya kita panggil model sisanya.
+
+			Di dalam Route Web.php yang asalnya authornya
+		        
+				* "posts" => $user->posts
+
+				menjadi 
+				
+				*  "posts" => $user->posts->load('category', 'user')
+
+				lakukan juga untuk kategory dengan hal yang sama

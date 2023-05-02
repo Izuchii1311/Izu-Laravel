@@ -43,16 +43,16 @@ Route::get('/about', function () {
 // Route Category
 Route::get('/categories/{category:slug}', function(Category $category){
     return view('posts', [
-        "title" => "Post by Category : " . $category->name,
-        "posts" => $category->posts
+        "title" => "Category : " . $category->name,
+        "posts" => $category->posts->load('category', 'user')
     ]);
 });
 
 // Route Author
 Route::get('/authors/{user:username}', function(User $user){
     return view('posts', [
-        "title" => "User Post",
+        "title" => "Semua Postingan oleh " . $user->username,
         "username" => $user->username,
-        "posts" => $user->posts
+        "posts" => $user->posts->load('category', 'user')
     ]);
 });

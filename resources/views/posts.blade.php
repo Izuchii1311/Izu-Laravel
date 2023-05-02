@@ -3,7 +3,7 @@
 @section('container')
 <div class="container mt-4">
 
-    <h3 class="border-bottom border-danger-subtle pb-3 mb-4">Semua Postingan</h3>
+    <h3 class="border-bottom border-danger-subtle pb-3 mb-4">{{ $title ?? null }}</h3>
 
         @foreach ($posts as $post)
             <div class="content m-4">

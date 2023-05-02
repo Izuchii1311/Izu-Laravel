@@ -10,14 +10,15 @@ class PostController extends Controller
 {
     public function index(){
         return view('posts', [
-            "title" => "Postingan",
-            "posts" => Post::all()
+            "title" => "Semua Postingan",
+            // "posts" => Post::all()
+            "posts" => Post::with(['user', 'category'])->latest()->get()
         ]);
     }
 
     public function show(Post $post){
         return view('post', [
-            "title" => "Postingan",
+            "title" => "Postingan oleh " . $post->user->username,
             "post" => $post
         ]);
     }
