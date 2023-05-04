@@ -810,10 +810,127 @@ Akan menghapus view untuk kategori dan menyatukannya di dalam view Posts.
 #12 Redesign UI
 
 Akan menggunakan Bootstrap dan API dari layanan Unsplash sebagai penyedia gambar.
+Melakukan perubahan pada route untuk membuat halaman by category dan membuat halaman category.
+Menghubungkan dengan API Unsplash berdasarkan kategori yang ada 
+
+	* <img src="https://source.unsplash.com/1200x400?{{ $post->category->name }}" class="card-img-top" alt="{{ $post->category->name }}" class="img-fluid">
+
+	API Unsplash "https://source.unsplash.com/1200x400?pohon"
 
 
 
 
 
 
-#13
+#13 Searching & Pagination
+
+Membuat fitur Searching dan Pagination menggunakan Laravel.
+
+Fitur Searching
+Membuat form untuk search, lalu actionnya mengarah ke /posts dan tangkap datanya menggunakan request.
+Akan memecah query dan membuat pencarian data di modelnya.
+
+Menggunakan juga fitur Query Scopes agar kita bisa membuat filter milik kita sendiri dan akan menggunakan yang local. Dengan menggunakan Local Scopes itu memungkinkan kita untuk mendefinisikan query query umum yang bisa digunakan kembali di dalam aplikasi. Contohnya jika misalkan kita butuh untuk secara sering mengambil data user yang dianggap populer.
+
+Maka di dalam model kita membuat scope seperti berikut
+
+	* public function scopePopular(Builder $query): void
+		{
+			$query->where('votes', '>', 100);
+		}
+
+	Kata scopenya wajib sisanya bebas.
+	akan membuat lebih efisien dengan mengganti dengan menggunakan method when()
+
+	*     public function scopeFilter($query, array $filters){
+			if (isset($filters['search']) ? $filters['search'] : false){
+				return $query->where('title', 'like', '%' . $filters['search'] . "%")
+					->orWhere('excerpt', 'like', '%' . $filters['search'] . "%");
+				}
+			}
+
+	when() method itu akan dijalankan ketika first argumen berisi true jadi tidak akan menggunakan if lagi.
+	Menjadi seperti berikut
+
+	*     $query->when($filters['search'] ?? false, function($query, $search){
+				return $query->where('title', 'like', '%' . $filters['search'] . "%")
+				->orWhere('excerpt', 'like', '%' . $filters['search'] . "%");
+			});
+
+	$query menjalankan method when(ini ga ada ?? dipilih ini, lalu jalankan fungsi yang mengambil $query, kalo ada isinya ambil apa yang ada di dalam $searchnya)
+
+	Selanjutnya akan membuat fitur search lebih spesifik, misalkan kita membuka semua postingan dengan kategory web design lalu kita mencari judul dengan kategory programming. Dan itu harusnya tidak akan muncul postingannya
+
+	buat juga seperti code diatas untuk category dan authors
+
+	*   $query->when($filters['category'] ?? false, function($query, $category){
+            return $query->whereHas('category', function($query) use ($category) {
+                $query->where('slug', $category);
+            });
+        });
+
+        $query->when($filters['authors'] ?? false, function($query, $user){
+            return $query->whereHas('user', function($query) use ($user) {
+                $query->where('username', $user);
+            });
+        });
+
+	lalu sekarang kita arahkan link di viewsnya untuk authors dan category menjadi
+
+	* /posts?authors={{ $post->user->username }}
+
+	Maka akan menampilkan page dengan authors yang sama, lalu kita dapat melakukan search yang dimana kita akan mencari judul dengan nama authornya si a misalkan.
+
+	Dan tambahkan juga code di dalam view form search posts untuk melakukan request berdasarkan category atau authors
+
+	*     <form action="/posts" method="get">
+                @if (request('category'))
+                    <input type="hidden" name="category" value="{{ request('category') }}">
+                @endif
+                @if (request('authors'))
+                    <input type="hidden" name="authors" value="{{ request('authors') }}">
+                @endif
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Search..." name="search" value="{{ request('search') }}">
+                    <button class="btn btn-dark text-white" type="submit">Search</button>
+                  </div>
+            </form>
+
+	Maka untuk Post controller nya sekarang di index yang menampilkan semua data menjadi seperti ini
+
+		*     public function index(){
+				$title = '';
+				if(request('category')){
+					$category = Category::firstWhere('slug', request('category'));
+					$title = ' dengan kategori ' . $category->name;
+				}
+				if(request('authors')){
+					$authors = User::firstWhere('username', request('authors'));
+					$title = ' oleh ' . $authors->name;
+				}
+
+				return view('posts', [
+					"title" => "Semua postingan" .  $title,
+					"active" => "posts",
+					"posts" => Post::latest()->filter(request(['search', 'category', 'authors']))->paginate(7)->withQueryString()
+				]);
+			}
+
+		Karena sekarang menggunakan view posts untuk menampilkan semuanya maka route untuk category berdasarkan slug dan authors berdasarkan username dihapus.
+		Jangan lupa juga untuk mengarahkan hal yang sama di post
+			
+			* /posts?authors={{ $post->user->username }}
+
+		Untuk membuat pagination dengan cara namun secara default laravel menggunakan tailwind untuk tampilan paginationnya
+
+			*     <div class="d-flex justify-content-center mt-5 mb-5">
+					{{ $posts->links() }}
+				</div>
+
+			agar menggunakan bootstrap di AppServiceProvider.php tambahkan code
+
+			*     public function boot(): void
+					{
+						Paginator::useBootstrap();
+					}
+				}

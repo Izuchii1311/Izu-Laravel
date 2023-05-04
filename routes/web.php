@@ -50,23 +50,3 @@ Route::get('/categories', function(){
         "categories" => Category::All(),
     ]);
 });
-
-Route::get('/categories/{category:slug}', function(Category $category){
-    return view('posts', [
-        "title" => "Category : " . $category->name,
-        "active" => "categories",
-        // Method with (N+1 Problem Lazy Eager Loading)
-        "posts" => $category->posts->load('category', 'user')
-    ]);
-});
-
-// Route Author
-Route::get('/authors/{user:username}', function(User $user){
-    return view('posts', [
-        "title" => "Semua Postingan oleh " . $user->username,
-        "username" => $user->username,
-        "active" => "posts",
-        // Method with (N+1 Problem Lazy Eager Loading)
-        "posts" => $user->posts->load('category', 'user')
-    ]);
-});
