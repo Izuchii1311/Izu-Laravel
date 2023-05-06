@@ -1008,3 +1008,76 @@ Maka itu akan menghapus data form yang telah diisinya, untuk solusinya dengan se
 	masukkan $request di dalam RegisterController ke dalam sebuah variabel.
 	lalu lakukan bcrypt untuk password
 	dan juga buat flashing data agar menampilkan sesuatu ketika berhasil register agar menampilkan pesannya di dalam view registernya menggunakan alert dari bootstrap dan simpan alertnya di view login.
+
+
+
+
+
+#16 User Login & Middleware
+
+Akan membuat dan mengaplikasikan fitur login, sehingga user yang sudah melakukan registrasi bisa masuk ke dalam aplikasi kita.
+
+Laravel.com/Authentication
+Laravel memiliki plugin starter kit, yang khusus untuk menangani Authentication, yaitu Laravel Breeze dan Laravel Jetstream. Pada latihan ini tidak akan menggunakan Laravel Breeze atau starter kitnya. Dan akan membuat Authentication secara Manual.
+
+lakukan sedikit perubahan pada view login agar mengirimkan data login.
+buat juga route login:post yang memanggil method authenticate.
+kemudian buat method authenticate di LoginController-nya
+
+buat juga class is-invalid untuk form login 
+	* @error('email')is-invalid @enderror
+
+buat juga value old nya
+	* value="{{ old('username') }}"
+
+dan buat juga sebuah div untuk menampilkan {{ $message }} errornya.
+
+
+Selanjutnya buat validasi pengecekan apakah email sama dengan yang sudah terdaftar?
+        *  if (Auth::attemp($credentials)) {
+            $request->session()->regenerate();
+
+			return redirect()->intended('dashboard');
+        	}
+
+	kenapa menggunakan regenerate() pada session(), karena untuk menghindari sebuah teknik hacking session fixation. Dengan cara memasuki celah di session pura pua masuk dengan session yang sama tanpa login dahulu. Maka untuk menghindari ini dilakukan generate ulang sessionnya.
+
+	Selanjutnya akan melakukan redirect ke halaman dashboard dengan menjalankan method intended terlebih dahulu.
+	Intended, sebuah method yang disediakan oleh laravel yang akan melakukan redirect usernya ke sebuah tempat atau url sebelum melewati sebuah authentication middleware.
+
+	Dan jika gagal juga, kita harus buat codenya. 
+	masih di dalam method authenticate tambahkan baris code berikut
+
+		# ketika gagal maka lakukan berikut
+        	return back()->with('loginError', 'Login failed!'); 
+
+		lalu selanjutnya di index - login, tampilkan sebuah message failed login
+
+		    * {{-- Failed Login --}}
+				@if(session()->has('loginError'))
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+						{{ session('loginError') }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				@endif
+
+
+	Berikutnya kita akan membuat sebuah controller untuk DashboardController.php dan di dalamnya membuat method index
+	Kemudian buat return ke view dashboard.index.
+
+	Problemnya kita sudah login dan diarahkan ke halaman dashbord namun jika di url diketikkan /login maka akan tetap bisa untuk kembali ke halaman login, yang seharusnya tidak bisa.
+
+	Maka kita harus mempelajari Middleware Authentication.
+	Apa itu Middleware?
+		= middleware itu menyediakan sebuah mekanisme yang memudahkan kita untuk melakukan inspeksi dan filtering http request jadi request kita difilter terlebih dahullu oleh middleware.
+		Middleware itu dapat dipasang di routes kita.
+		
+		Misalkan gini 
+			* Route::get('/login', [LoginController::class, 'index']);
+
+		Jika ada request ke url /login yang metodenya get jalankan [LoginController::class, 'index'] maka kita dapat menambahkan middleware langsung kesini.
+
+		* Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('guest');
+
+		jika user belum login maka yang tampil tampilan login button, tetapi jika sudah maka akan tampil drop down. ini ada di view navbar yang melakukan auth else.
+		Jadi jika user berhasil login maka akan diarah kan ke dashboard/index dan menampilkan halaman dashboard. jika belum login maka akan menampilkan view dengan adanya button login.
