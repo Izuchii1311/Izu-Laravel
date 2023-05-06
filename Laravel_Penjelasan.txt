@@ -962,3 +962,49 @@ Lalu panggil cssnya di main
 	
 Kemudian buat juga view dan contreoller untuk jika belum punya akun maka akan ke halaman view Registrasi.
 dan lakukan yang sama dengan login, paling edit lagi di form registernya.
+
+
+
+
+
+
+#15 User Registration
+
+Menjalankan fungsi registrasi, jangan lupa untuk memberikan action ke halaman register itu sendiri dan method post.
+Lalu buat route register baru yang melakukan method post dengan memanggil method di RegisterControllernya yaitu store
+Kemudian buat method store di dalam Controllernya.
+
+Jika bertemu dengan 419 | Page Expired
+itu artinya laravel sedang melakukan pengamanan ketika melakukan method post lewat form.
+Dokumentasi Laravel(csrf Protection)
+CSRF (Cross-site request forgery), csrf itu ceritanya sebuah teknik serangan terhadap website dimana biasanya serangan ini memalsukan request dari website yg lain / bajak. Misalkan ada request yang dilakukan oleh website lain ke website kita menggunakan URL yang sesuai. 
+Laravel memiliki Preventing CSRF Request, untuk menjaga requestnya agar selalu dikirimkan dari website kita, dengan menggunakan csrf_token. 
+Maka csrf kita akan menggenerate sebuah token di dalam session dan nanti akan dicocokan dengan yang ada di requestnya. Sama atau tidak jika sama berarti aman sama sama dikitim dari website kita.
+
+caranya cukup menggunakan @csrf di dalam form
+
+lalu kita akan membuat validasi, ada di laravel.com/validation
+maka method menjadi seperti berikut yang @error('name')is-invalid @enderror 
+
+Lalu agar ada text error di bawahnya maka
+
+	*   <input type="text" name="name" class="form-control @error('name')is-invalid @enderror " id="floatingInput" placeholder="Name">
+        	<label for="name">Nama Lengkap</label>
+                @error('name')
+                    <div class="invalid-feedback">
+                        Input your name.
+                    </div>
+                @enderror
+
+	dan lakukan ke semua inputannya
+
+Jika semua nya sudah maka ketika mengisikan form lalu ada kekuranga atau kesalahan yang menyebabkan tampil pesan error.
+Maka itu akan menghapus data form yang telah diisinya, untuk solusinya dengan seperti berikut dan itu berada di dalam inputannya
+
+	* value="{{ old('nama') }}
+
+	Latihan nanti akan menampilkan password untuk mengeceknya.
+
+	masukkan $request di dalam RegisterController ke dalam sebuah variabel.
+	lalu lakukan bcrypt untuk password
+	dan juga buat flashing data agar menampilkan sesuatu ketika berhasil register agar menampilkan pesannya di dalam view registernya menggunakan alert dari bootstrap dan simpan alertnya di view login.
