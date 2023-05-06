@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Post;
-use App\Models\User;
 use App\Models\Category;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,3 +50,9 @@ Route::get('/categories', function(){
         "categories" => Category::All(),
     ]);
 });
+
+// Route Login
+Route::get('/login', [LoginController::class, 'index']);
+
+// Route Register
+Route::get('/register', [RegisterController::class, 'index']);

@@ -934,3 +934,31 @@ Maka di dalam model kita membuat scope seperti berikut
 						Paginator::useBootstrap();
 					}
 				}
+
+
+
+
+
+
+#14 View Login & Registration
+
+Membuat tampilan untuk Fitur Login dan Registrasi dan akan menggunakan tema yang sudah ada oleh bootstrap.
+
+GetBootstrap.com/example	lalu download dan ekstract
+kemudian pilih yang sign-in
+
+Sebelum itu menambahkan button di dalam navbar untuk melakukan login.
+Lalu untuk memperindah gunakan icon yang sudah disediakan juga oleh bootstrap.
+
+Kemudian buat routes untuk halaman login. Dan buat juga controller untuk Loginnya.
+Kemudian buat method index untuk memanggil viewnya, dan buat sebuah folder login yang di dalamnya ada file index.blade.php.
+Panggil @extends ke layout dan juga panggil @section untuk memulai mengisikan contentnya
+
+Lalu buka file template untuk login yang sudah disediakan oleh bootstrap dan copykan.
+lalu copy juga css nya ke css milik kita di folder public.
+Lalu panggil cssnya di main 
+
+    * <link rel="stylesheet" href="/css/style.css">
+	
+Kemudian buat juga view dan contreoller untuk jika belum punya akun maka akan ke halaman view Registrasi.
+dan lakukan yang sama dengan login, paling edit lagi di form registernya.
