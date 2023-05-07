@@ -1159,3 +1159,63 @@ Specifying the resource model, jadi kita bisa langsung menentukan route model bi
 			selanjutnya di DashboardPostController method show, kita mereturn view dashboard.posts.show 
 			maka oleh karena itu kita harus membuat file show.blade.php di dalam folder dashboard/posts
 			yang isinya melakukan copy dari post dan lakukan sedikit modifikasi
+
+
+
+
+
+#18 Create Post Form
+
+Akan menambah tombol untuk menambahkan postingan di tampilan MyPost.
+
+  * <a href="/dashboard/posts/create" class="btn btn-primary mb-3">Create new Post +</a>
+
+	Lalu di DashboardPostController kita akan melakukan return view('dashboard.posts.create')
+	kemudian buat file create.blade.php
+	dan kemudian di dalamnya akan membua form untuk dapat menambahkan postingan.
+
+	Menginstall package Eloquent Sluggable -> agar jika user membuat judul maka akan otomatis slugnya dibuat.
+	https://github.com/cviebrock/eloquent-sluggable
+
+	Installation
+	* composer require cviebrock/eloquent-sluggable
+
+	cara penggunaan packagenya :
+	Di model yang mana yang ingin digunakan, untuk kasus kita kita akan menggunakannya di model Post.
+
+		tambahkan code code berikut di model postnya
+
+		* use Cviebrock\EloquentSluggable\Sluggable;
+			class Post extends Model {
+				use Sluggable;
+				public function sluggable(): array {
+					return [
+						'slug' => ['source' => 'title']
+					];
+				}
+			}
+
+	supaya slug ini muncul secara otomatis, kita akan menggunakan javascript Ajax untuk mengambil title nya dan ubah menjadi slug
+	tambahkan script di bawah di view createnya, kemudian karena akan menggunakan method baru untuk mengelola slugna maka akan dibua method baru di DashboardPostController.
+	kemudian akan membuat route baru, karena method barunya tidak termasuk resource laravel. route ini harus berada di atas route dashboard/posts karena jika tidak slug otomatis tidak akan berjalan
+
+	Akan menggunakan Trix editor untuk mengisikan text di body.
+	Untuk menggunakannya dengan cara download terlebih dahulu
+
+	- kemudian ekstract, lalu buka folder dist (gunakan trix 1.3.1 agar lebih mudah menemukan file trix.css dan trix.js) kemudian copy kan ke dalam folder css dan js milik kita di public
+
+	- menambahkan 2 file ini di atas headnya
+		<link rel="stylesheet" type="text/css" href="/css/trix.css">
+		<script type="text/javascript" src="/js/trix.js"></script>
+
+	- untuk memulainya dengan menambahkan <trix-editor></trix-editor>
+
+		<form …>
+			<input id="x" type="hidden" name="content">
+			<trix-editor input="x"></trix-editor>
+		</form>	
+
+	- Kemudian tinggal buat di viewnya
+
+
+Untuk penjelasannya dapat di lihat di source codenya.

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Http\Request;
+use \Cviebrock\EloquentSluggable\Services\SlugService;
 
 class DashboardPostController extends Controller
 {
@@ -23,7 +25,10 @@ class DashboardPostController extends Controller
      */
     public function create()
     {
-        //
+        // Menambahkan model category
+        return view('dashboard.posts.create', [
+            'categories' =>Category::all()
+        ]);
     }
 
     /**
@@ -31,7 +36,7 @@ class DashboardPostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return $request;
     }
 
     /**
@@ -66,5 +71,16 @@ class DashboardPostController extends Controller
     public function destroy(Post $post)
     {
         //
+    }
+
+    // akan mengambil data dari controller dashboard
+    // sebuah method baru yang tugasnya menangani ketika ada permintaan slug
+    // Request itu akan terjadi ketika berpindah tab, akan mengambil inputan $title
+    public function checkSlug(Request $request)
+    {
+        // gunakan slug service nya yang ada di github eloquent-sluggable
+        // slug akan berisi $request yang ada di titlenya (dia juga akan mengecek apakah ada slug yang sama di databasenya, karena menggunakan library ini)
+        $slug = SlugService::createSlug(Post::class, 'slug', $request->title);
+        return response()->json(['slug' => $slug]);
     }
 }
