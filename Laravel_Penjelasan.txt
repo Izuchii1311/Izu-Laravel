@@ -1081,3 +1081,81 @@ Selanjutnya buat validasi pengecekan apakah email sama dengan yang sudah terdaft
 
 		jika user belum login maka yang tampil tampilan login button, tetapi jika sudah maka akan tampil drop down. ini ada di view navbar yang melakukan auth else.
 		Jadi jika user berhasil login maka akan diarah kan ke dashboard/index dan menampilkan halaman dashboard. jika belum login maka akan menampilkan view dengan adanya button login.
+
+
+
+
+
+#17 Dashboard UI
+
+Download template examples dari bootstrap, kemudian ekstract lalu pilih bagian dashboard dan copykan file css dan js ke dalam folder css dan js kita yang ada di folder public.
+Lalu merubah kembali untuk DashboardController karena tidak akan mengelola lebih dalam fungsi fungsi lainnya, maka di dalam routenya kita langsung mengarahkan ke view index milik dashbord tanpa melalui DashboardController.
+
+	* // Route Dashboard
+		Route::get('/dashboard', function(){
+			return view('dashboard.index');
+		})->middleware('auth');
+
+	Code di edit menjadi seperti itu maka sekarang kita dapat menghapus DashboardControllernya.
+
+Edit file index dashboard dengan template dashboard dari bootstrap. Lalu untuk button logout samakan dengan yang ada di navbar.
+Kemudian akan memecah bagian bagiannya menjadi partials. 
+Pertama buat folder layouts di dalam folder dashboard, lalu di dalam folder layouts buat file baru yaitu main.blade.php. Kemudian pindahkan yang ada di index ke dalam main atau copy kan. Yang ada di main header dan sidebar akan di pindahkan.
+
+Lalu di index kita melakukan @extends ke dashboard.layouts.main 
+
+Kemudian di sidebar postingan kita akan membuat si user bisa melakukan crud, namun akan lebih baik jika si crudnya itu tidak seperti ini misalkan /dashboard/posts/create. kita akan menggunakan resources dari laravelnya.
+Laravel.com/Controller
+
+Jika kita menganggap sebuah model di eloquent kita sebagai resource, itu merupakan sebuah kumpulan aksi yang biasanya kita bikin untuk melakukan sesuatu terhadap resource kita. Contoh kita mempunyai aplikasi yang di dalamnya ada model foto atau movie itu di dalamnya pasti akan terjadi crud. Kerena ini sudah umum dilakukan sebagai use case laravel ini membuatkan sebuah route khusus untuk melakukan CRUD yang dinamakan resource controller. cara bikinnya dengan memanggil make:controller --resources
+
+maka nanti akan otomatis dibuatkan controller yang sudah punya route ka path berikut
+
+Verb			URI						Action			Route Name
+GET				/photos					index			photos.index
+GET				/photos/create			create			photos.create
+POST			/photos					store			photos.store
+GET				/photos/{photo}			show			photos.show
+GET				/photos/{photo}/edit	edit			photos.edit
+PUT/PATCH		/photos/{photo}			update			photos.update
+DELETE			/photos/{photo}			destroy			photos.destroy
+
+Nanti di dalam routes web.php kita tidak perlu membuat 1 per 1 route tersebut
+maka dengan 1 baris ini akan menangani semuanya
+	* Route::Resource('photos', PhotoController::class);Route::resource('/dashboard/posts', DashboardPostController::class)->middleware('auth');
+
+Specifying the resource model, jadi kita bisa langsung menentukan route model binding untuk controller baru kita kita akan memberi tahukan bahwa controller yang kita punya selain dia bentuknya resource dia juga langsung terhubung ke model yang mana.
+	* php artisan make:controller DashboardPostController --resource
+	* php artisan make:controller DashboardPostController --resource --model=Post
+
+	maka di dalam fil DashboardPostController sudah akan dibuatkan method method tertentu untuk melakukan CRUD
+	lalu panggil di route
+
+		* Route::resource('/dashboard/posts', DashboardPostController::class)->middleware('auth');
+
+		Karena di side bar kita ada yang mengarahkan ke /dashboard/posts 
+		maka secara otomatis akan memanggil DashboardPostController di method indexnya yang akan mengembalikan view baru
+		Kita akan membuat folder baru di dalam folder dashboard yaitu dashboard/posts/index
+
+		Isinya samakan dengan index dashboard, lalu tambahkan table responsive dari file template dashboard milik bootstrap. 
+		lalu di dalam DashboardPostController lakukan return view deangan mengembalikan data
+
+			* return view('dashboard.posts.index', [
+				'posts' => Post::where('user_id', auth()->user()->id)->get()
+			]);
+
+		dan lakukan edit lagi pada tabel agar adanya button di disetiap contentnya, seperti detail, edit, dan delete.
+		Jika routenya menggunakan resource maka kita tidak bisa langsung mengambil atau melihat data berdasarkan { posts/slug } seperti berikut karena resource itu juga sudah memiliki pengaturan defaultnya yaitu id. 
+		ada caranya di laravel.com/route model binding (costumizing the key)
+
+		karena jika tidak ingin selalu menggunakan id kita dapat menimpanya dengan sebuah method getRouteKeyName di dalam modelnya.
+		maka di dalam model Post.php tambahkan
+
+		*  public function getRouteKeyName(): string
+			{
+				return 'slug';
+			}
+
+			selanjutnya di DashboardPostController method show, kita mereturn view dashboard.posts.show 
+			maka oleh karena itu kita harus membuat file show.blade.php di dalam folder dashboard/posts
+			yang isinya melakukan copy dari post dan lakukan sedikit modifikasi
