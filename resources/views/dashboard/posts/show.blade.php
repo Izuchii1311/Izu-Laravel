@@ -10,8 +10,12 @@
                 
                 <article>
                     <div class="justify-content-end d-flex">
-                        <a href="" class="btn btn-warning mb-4 ms-2"><span data-feather="edit" class="align-text-bottom text-white"></span></a>
-                        <a href="" class="btn btn-danger mb-4 ms-2"><span data-feather="trash-2" class="align-text-bottom"></span></a>
+                        <a href="/dashboard/posts/{{ $post->slug }}/edit" class="btn btn-warning mb-4 me-2"><span data-feather="edit" class="align-text-bottom text-white"></span></a>
+                        <form action="/dashboard/posts/{{ $post->slug }}" method="post" class="d-inline">
+                            @method('delete')
+                            @csrf
+                            <button class="btn btn-danger text-white" onclick="return confirm('Are you sure?')"><span data-feather="trash-2" class="align-text-bottom"></span></button>
+                          </form>
                     </div>
 
                     <img src="https://source.unsplash.com/1200x400?{{ $post->category->name }}" class="card-img-top" alt="{{ $post->category->name }}" class="img-fluid">

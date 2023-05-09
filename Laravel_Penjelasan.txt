@@ -1228,3 +1228,113 @@ Untuk penjelasannya dapat di lihat di source codenya.
 
 Lanjutan dari video sebelumnya, Akan memberikan validasi di controllernya
 Membuat Validasi di Controllernya dan membuat sedikit pengamanan dan tampilan jika terjadi error.
+
+
+
+
+
+#20 Update & Delete
+
+Menambahkan fitur Update Data dan Delete Data
+
+Akan menjalankan fungsi fitur Delete terlebih dahulu.
+Masuk ke dalam file index.blade.php di dalam folder /dashboard/posts/ kita akan memasukkan tag link untuk button ke dalam form karena agar kita bisa mendapatkan id dari setiap postnya.
+
+Namun disini kita mengarahkan actionnya ke /dashboard/posts dan methodnya post.
+tapi kenapa post? dant tidak get? 
+karena post akan mengembalikan si slug dari setiap postingannya ke halaman itu sendiri, yang kemudian akan ditangkap oleh si @method('delete')
+kemudian kita akan memanggil method blade yaitu @method('delete')
+karena tag form hanya bisa 2 yaitu get dan post maka kita akan timpa dengan menggunakan @method('delete'), sehingga form tersebut akan melakukan method delete. kemudian ganti yang asalnya berupa tag a menjadi button
+
+	*   <form action="/dashboard/posts/{{ $post->slug }}" method="post" class="d-inline">
+        	@method('delete')
+            @csrf
+                <button class="badge bg-danger text-white border-0" onclick="return confirm('Are you sure?')><span data-feather="trash-2" class="align-text-bottom"></span></button>
+        </form>
+            	{{-- <a href="" class="badge bg-danger text-white"><span data-feather="trash-2" class="align-text-bottom"></span></a> --}}
+
+	dengan begitu buttonnya tidak menjadi link lagi, tetapi menjadi button. Dan ada action ketika button di klik, jika di Ok maka akan masuk ke dalam action method delete. 
+
+Selanjutnya masuk ke dalam Controllernya lalu di bagian method destroy.
+si slugnya akan di kirim ke Controllernya lalu ditangkap oleh (Post $post) kemudian hapus data $post berdasarkan id.
+
+	*	public function destroy(Post $post){
+        	Post::destroy($post->id);
+        	return redirect('/dashboard/posts')->with('success', 'Post has been deleted!');
+    	}
+
+dan jangan lupa button di dalam detail setiap postnya di perbaiki juga
+
+
+Untuk Edit, di halaman index arahkan tag linknya seperti berikut.
+
+    *   <a href="/dashboard/posts/{{ $post->slug }}/edit" class="badge bg-warning text-white"><span data-feather="edit" class="align-text-bottom"></span></a>
+
+	dengan cara seperti ini /dashboard/posts/{{ $post->slug }}/edit merupadakan aturan default dari resource laravel.
+	Kita juga dapat melihat list apa saja yang ada di dalam route resource, dengan mengetikkan 
+
+		* php artisan route:list
+	
+	untuk view edit kita duplicate create dan lakukan bebrapa modifikasi pada viewnya.
+	lalu ubah juga di dalam controllernya. (edit untuk viewnya update untuk prosesnya).
+
+	maka untuk method edit seperti berikut
+
+		    *	public function edit(Post $post) {
+					return view('dashboard.posts.edit', [
+						// datanya akan diisi dengan mengambil data dari $post 
+						'post' => $post,
+						'categories' =>Category::all()
+					]);
+				}
+
+	di dalam view edit ubah title, kemudian ubah form 
+
+		*   <form method="post" action="/dashboard/posts/{{ $post->slug }}" class="mb-5">
+      			@method('put')
+				...
+
+	lalu isikan formnya secara otomatis dengan data sebelumnya. Laravel punya fitur yang keren seperti berikut.
+
+		value="{{ old('title', $post->title) }}
+
+		maksudnya cek, ada old tidak dari title, jika tidak ada maka akan mengambil judulnya. lakukan hal yang sama pada slug, kategori, dan body.
+		dan ubah judul button menjadi update post.
+
+		Sebenarnya update tidak bisa dilakukan begitu saja, kenapa?
+		misalkan ada post 1 dengan slug ... dan kategori programming, lalu ketika ingin diedit hanya merubah kategorinya saja. Ketika di update itu tidak akan bisa karena slugnya sama, maka kita harus merubah menjadi baru slugnya.
+
+		Buka kembali Controllernya, untuk method update akan melakukan validasi yang sama dengan method store maka bisa mengcopynya
+
+		method update
+
+			*	public function update(Request $request, Post $post)
+				{
+					$rules = [
+						'title' => 'required|max:50',
+						// melakukan validasi lagi pada slug, slugnya harus diisi dan juga uniq
+						// kita akan menggunakan slug yang sama tanpa merubahnya.
+						// 'slug' => 'required|unique:posts',
+						'category_id' => 'required',
+						'body' => 'required'
+					];
+
+					// Melakukan pengecekan pada slug (jika slug yg baru itu sama dengan slug yang lama maka itu akan lolos) tapi (jika slug yang baru itu beda dengan slug yang lama maka lakukan validasi)
+					if ($request->slug != $post->slug) {
+						$rules['slug'] = 'required|unique:posts';
+					} 
+
+					$validatedData = $request->validate($rules);
+
+					$validatedData['user_id'] = auth()->user()->id;
+					$validatedData['excerpt'] = Str::limit(strip_tags($request->body), 100 ); 
+
+					// Update
+					Post::where('id', $post->id)
+						->update($validatedData);
+
+					return redirect('/dashboard/posts')->with('success', 'Post has been updated!');
+
+				}
+
+		dan jangan lupa edit di show.blade.php agar button edit berfungsi.

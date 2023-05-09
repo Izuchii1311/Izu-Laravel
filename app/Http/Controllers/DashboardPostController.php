@@ -73,15 +73,45 @@ class DashboardPostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        return view('dashboard.posts.edit', [
+            // datanya akan diisi dengan mengambil data dari $post 
+            'post' => $post,
+            'categories' =>Category::all()
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
+    // $request data baru
+    // $post data lama yang sudah ada di tabel 
     public function update(Request $request, Post $post)
     {
-        //
+        $rules = [
+            'title' => 'required|max:50',
+            // melakukan validasi lagi pada slug, slugnya harus diisi dan juga uniq
+            // kita akan menggunakan slug yang sama tanpa merubahnya.
+            // 'slug' => 'required|unique:posts',
+            'category_id' => 'required',
+            'body' => 'required'
+        ];
+
+        // Melakukan pengecekan pada slug (jika slug yg baru itu sama dengan slug yang lama maka itu akan lolos) tapi (jika slug yang baru itu beda dengan slug yang lama maka lakukan validasi)
+        if ($request->slug != $post->slug) {
+            $rules['slug'] = 'required|unique:posts';
+        } 
+
+        $validatedData = $request->validate($rules);
+
+        $validatedData['user_id'] = auth()->user()->id;
+        $validatedData['excerpt'] = Str::limit(strip_tags($request->body), 100 ); 
+
+        // Update
+        Post::where('id', $post->id)
+            ->update($validatedData);
+
+        return redirect('/dashboard/posts')->with('success', 'Post has been updated!');
+
     }
 
     /**
@@ -89,7 +119,8 @@ class DashboardPostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        Post::destroy($post->id);
+        return redirect('/dashboard/posts')->with('success', 'Post has been deleted!');
     }
 
     // akan mengambil data dari controller dashboard
