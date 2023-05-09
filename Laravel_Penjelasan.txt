@@ -1338,3 +1338,110 @@ Untuk Edit, di halaman index arahkan tag linknya seperti berikut.
 				}
 
 		dan jangan lupa edit di show.blade.php agar button edit berfungsi.
+
+
+
+
+
+#21 Upload Image
+
+Menambahkan fitur Upload Gambar dan menambahkan validasi yang boleh diupload hanya gambar saja.
+Untuk file input upload gambar akan mengambil dari bootstrap.
+
+Buka file create.blade.php lalu tambahkan inputan untuk melakukan upload gambar dan terletak di bawah category.
+
+    *   <div class="mb-3">
+          	<label class="form-label" for="image">Upload Image</label>
+          	<input type="file" class="form-control" id="image" name="image">
+        </div>
+
+	form ini tidak akan berjalan jika kita ingin melakukan upload gambar, kita perlu menambahkan sebuah atribut di dalam formnya. Yaitu enctype="multipart/form-data"
+	Sehingga form ini bisa menangani 2 hal
+	yang pertama adalah inputan dalam bentuk text akan diambil memakai request biasa namun jika ada fileakan diambil oleh request file.
+
+	Kenapa kita harus menambahkan enctype karena jika kita melakukan ddd($request), di dalam request itu hanya akan menerima inputan berupa text, dan untuk gambar akan disimpan di dalam files dan yang ada di files yang akan disimpan.
+
+	Sebenarnya jika kita melakukan sesuatu dan berhasil mengupload gambar maka akan tersimpan di folder storage.
+	
+	Laravel.com/File Storage
+	Cara mengatur gambar ada di konfigurasi file system. config/filesystems.php
+	Di dalamnya kita bisa tau bahwa penyimpanan kita berada di storage/app(default).
+
+	Ini akan tersimpan secara local karena kita akan mengakses gambarnya ketika membuka pagenya. Maka lakukan setting di .env 
+		tambahkan code berikut
+
+		* FILESYSTEM_DISK=public
+
+		dilakukan public karena agar dapat diakses oleh siapa pun
+	
+	maka sekarang file akan disimpan di folder storage/public
+	namun jika kita mencoba mengakses gambarnya seperti ini
+		izu-laravel.test/storage/app/public/post-image/.... .jpg
+		
+		tidak akan terbuka, dan masih tidak bisa diakses, agar bisa diakses folder public yang ada di storage harus dihubungkan dahulu dengan folder public yang ada di dalam aplikasi.
+		Folder public diluar storage adalah folder public yang benar benar bisa diakses oleh user. 
+
+		Cara menghubungkan folder public di dalam aplikasi dengan folder public di dalam storage.
+		dengan menggunakan Symbolic link
+
+			* php artisan storage:link
+
+			maka kita dapat langsung mengaksesnya, dan di dalam folder public akan ada folder storage(symbolic link) yang tempat aslinya ada di storage.
+			untuk dapat menggunakannya kita menggunakan method asset()
+
+			* echo asset('storage/file.txt');
+
+
+kita tidak akan bisa mengupload gambar karena tidak ada field di databasenya untuk menerima gambar. 
+Oleh karena itu kita harus membuat lagi, dan melakukan fresh pada databasenya
+
+di dalam create_posts_table.php lalu tambahkan untuk field gambar
+	* $table->string('image')->nullable();
+
+namanya image dan boleh kosong (karena jika kosong akan menggunakan gambar dari unsplash)
+kenapa harus string karena kita akan menyimpan nama dan tempat penyimpanannya saja.
+karena untuk nama filenya akan disimpan disimpan di dalam database sedangkan filenya akan diupload di directori.
+
+Kemudian buka DatabaseSeeder.php dan tambahkan seeder berikut
+
+	*	\App\Models\User::create([
+            'name' => "Luthfi Nur Ramadhan",
+			'username' => 'izuchii3',
+            'email' => "luthfiramadhan.lr55@gmail.com",
+            'password' => bcrypt('password')
+        ]);
+
+Agar pertama kali melakukaan seed kita sudah memiliki data user baru, dan supaya user pertama kita dan user sisanya random. 
+
+jika sudah lakukan
+	*	php artisan migrate:fresh --seed
+
+Buka kembali DashboardPostController lalu tambahkan validasi untuk image 
+	*   'image' => 'image|file|max:2048',
+
+Buka kembali create.blade.php
+lalu tambahkan error untuk image, lakukan hal yang sama seperti title
+
+Kembali ke DashboardPostController membuat pengecekan jika gambar kosong, karena jika gambar dikosongkan berarti user akan menggunakan gambar dari unsplash.
+
+jika gambar tidak ada atau folder untuk membuat file tidak ada.
+Lakukan 
+
+	* php artisan config:cache
+	* php artisan config:clear
+
+Jika seperti ini selesai maka gambar bisa diupload, Namun ada carnya untuk menampilkan gambar kita tidak menggunakan unsplash. 
+Lakukan pengecekan untuk gambar, seperti berikut
+
+	*	{{-- jika ada field image maka tampilkan --}}
+        @if($post->image)
+            <div style="max-height: 350; overflow: hidden;">
+                <img src="  {{ asset('storage/' . $post->image) }}" class="card-img-top" alt="{{ $post->category->name }}" class="img-fluid">
+                <p>{!! $post->body !!}</p>
+            </div>
+        @else
+            <img src="https://source.unsplash.com/1200x400?{{ $post->category->name }}" class="card-img-top" alt="{{ $post->category->name }}" class="img-fluid">
+            <p>{!! $post->body !!}</p>
+        @endif
+
+lakukan yang sama untuk di posts, post, dan menu edit data

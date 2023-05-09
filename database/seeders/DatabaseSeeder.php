@@ -18,6 +18,13 @@ class DatabaseSeeder extends Seeder
         \App\Models\Post::factory(20)->create();
         \App\Models\User::factory(5)->create();
 
+        \App\Models\User::create([
+            'name' => "Luthfi Nur Ramadhan",
+            'username' => 'izuchii3',
+            'email' => "luthfiramadhan.lr55@gmail.com",
+            'password' => bcrypt('password')
+        ]);
+
         \App\Models\Category::create([
             'name' => 'Programming',
             'slug' => 'programming',

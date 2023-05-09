@@ -37,13 +37,20 @@ class DashboardPostController extends Controller
      */
     public function store(Request $request)
     {
+        // ddd($request);
         $validatedData = $request->validate([
             'title' => 'required|max:50',
             // unix dari tabel post
             'slug' => 'required|unique:posts',
             'category_id' => 'required',
+            'image' => 'image|file|max:2048',
             'body' => 'required'
         ]);
+
+        if($request->file('image')){
+            // jika ada gambarnya maka upload gambarnya
+            $validatedData['image'] = $request->file('image')->store('post-images');
+        }
 
         // user id mengambil dari user yang telah login
         $validatedData['user_id'] = auth()->user()->id;

@@ -35,8 +35,18 @@
         <div class="position-absolute bg-warning p-3 text-white"><a href="/posts?category={{ $posts[0]->category->slug }}" class="text-decoration-none text-white">{{ $posts[0]->category->name }}</a></div>
         @endif
 
+        {{-- jika ada field image maka tampilkan --}}
+        @if($posts[0]->image)
+            <div style="max-height: 350px; overflow: hidden;">
+                <img src="  {{ asset('storage/' . $posts[0]->image) }}" class="card-img-top" alt="{{ $posts[0]->category->name }}" class="img-fluid">
+            </div>
+        @else
+            <img src="https://source.unsplash.com/1200x400?{{ $posts[0]->category->name }}" class="card-img-top" alt="{{ $posts[0]->category->name }}">
+        @endif
+
+
         {{-- Memanggil gambar menggunakan API Unsplash dengan berdasarkan kategory kita. --}}
-        <img src="https://source.unsplash.com/1200x400?{{ $posts[0]->category->name }}" class="card-img-top" alt="{{ $posts[0]->category->name }}">
+        {{-- <img src="https://source.unsplash.com/1200x400?{{ $posts[0]->category->name }}" class="card-img-top" alt="{{ $posts[0]->category->name }}"> --}}
         <div class="card-body text-center">
             <h3 class="card-title"><a href="/posts/{{ $posts[0]->slug }}"  class="text-decoration-none text-dark">{{ $posts[0]->title }}</a></h5>
             <p>
@@ -68,7 +78,17 @@
 
                         {{-- <div class="position-absolute bg-dark p-3 me-3 text-white">{{ $post->category->name }}</div> --}}
 
-                        <img src="https://source.unsplash.com/500x400?{{ $post->category->name }}" class="card-img-top" alt="{{ $post->category->name }}">
+                        @if($post->image)
+                        <div style="max-height: 350px; overflow: hidden;">
+                            <img src="  {{ asset('storage/' . $post->image) }}" class="card-img-top" alt="{{ $post->category->name }}" class="img-fluid">
+                        </div>
+                        @else
+                            <img src="https://source.unsplash.com/500x400?{{ $post->category->name }}" class="card-img-top" alt="{{ $post->category->name }}">
+                            
+                        @endif
+
+
+                        
                         <div class="card-body">
                         <h5 class="card-title"><a href="/posts/{{ $post->slug }}" class="text-decoration-none text-dark">{{ $post->title }}</a></h5>
                         <p>

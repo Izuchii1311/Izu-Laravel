@@ -18,8 +18,16 @@
                           </form>
                     </div>
 
-                    <img src="https://source.unsplash.com/1200x400?{{ $post->category->name }}" class="card-img-top" alt="{{ $post->category->name }}" class="img-fluid">
-                    <p>{!! $post->body !!}</p>
+                    {{-- jika ada field image maka tampilkan --}}
+                    @if($post->image)
+                        <div style="max-height: 350px; overflow: hidden;">
+                            <img src="  {{ asset('storage/' . $post->image) }}" class="card-img-top" alt="{{ $post->category->name }}" class="img-fluid">
+                            <p>{!! $post->body !!}</p>
+                        </div>
+                    @else
+                        <img src="https://source.unsplash.com/1200x400?{{ $post->category->name }}" class="card-img-top" alt="{{ $post->category->name }}" class="img-fluid">
+                        <p>{!! $post->body !!}</p>
+                    @endif
             
                     <a href="/dashboard/posts" class="btn btn-success mb-4"><span data-feather="arrow-left" class="align-text-bottom"></span> Back to all my posts</a>
 

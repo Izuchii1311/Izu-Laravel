@@ -7,7 +7,7 @@
 
 <div class="col-lg-8">
     {{-- Karena menggunakan resource maka akan otomatis mengarah ke store untuk menambah datanya karena methodnya post --}}
-    <form method="post" action="/dashboard/posts" class="mb-5">
+    <form method="post" action="/dashboard/posts" class="mb-5" enctype="multipart/form-data">
         {{-- @csrf salah satu security milik laravel --}}
         @csrf
 
@@ -41,6 +41,16 @@
               <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
             @endforeach
           </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="image">Upload Image</label>
+          <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image">
+          @error('image')
+          <div class="invalid-feedback">
+            {{ $message }}
+          </div>
+          @enderror
         </div>
 
         {{-- trix editor untuk body, jika excerpt akan mengambil beberapa kata dari body --}}

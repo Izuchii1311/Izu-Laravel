@@ -13,6 +13,12 @@
             Postingan
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ Request::is('/posts*') ? 'active' : '' }}" href="/posts">
+            <span data-feather="book-open" class="align-text-bottom"></span>
+            See All Post
+          </a>
+        </li>
       </ul>
     </div>
   </nav>
