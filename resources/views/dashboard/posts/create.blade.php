@@ -7,19 +7,30 @@
 
 <div class="col-lg-8">
     {{-- Karena menggunakan resource maka akan otomatis mengarah ke store untuk menambah datanya karena methodnya post --}}
-    <form method="post" action="/dashboard/posts">
+    <form method="post" action="/dashboard/posts" class="mb-5">
         {{-- @csrf salah satu security milik laravel --}}
         @csrf
 
         <div class="mb-3">
           <label for="title" class="form-label">Title</label>
-          <input type="text" class="form-control" id="title" name="title">
+          <input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title" value="{{ old('title') }}"  autofocus>
+          @error('title')
+            <div class="invalid-feedback">
+              {{ $message }}
+            </div>
+          @enderror
         </div>
         {{-- Akan membuat slug otomatis ketika kita membuat judulnya --}}
         {{-- Dengan menggunakan sebuah package eloquent sluggable --}}
         <div class="mb-3">
           <label for="slug" class="form-label">Slug</label>
-          <input type="text" class="form-control" id="slug" name="slug" disabled readonly>
+          <input type="text" class="form-control @error('slug') is-invalid @enderror" id="slug" name="slug" readonly value="{{ old('slug') }}">
+          @error('slug')
+          <div class="invalid-feedback">
+            {{ $message }}
+          </div>
+          @enderror
+          <p>*slug akan dibuat secara otomatis.</p>
         </div>
 
         <div class="mb-3">
@@ -27,7 +38,7 @@
           <select class="form-select" name="category_id">
             {{-- akan melooping category dari table category dengan cara menginclude kan model category di controllernya --}}
             @foreach ($categories as $category)
-              <option value="{{ $category->id }}">{{ $category->name }}</option>
+              <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
             @endforeach
           </select>
         </div>
@@ -36,12 +47,13 @@
         <div class="mb-3">
           {{-- ubah for, id. name, inputnya menjadi body --}}
           <label for="body" class="form-label">Body</label>
-            <input id="body" type="hidden" name="body">
-            <trix-editor input="body"></trix-editor>
+          <input id="body" type="hidden" name="body" value="{{ old('body') }}">
+          <trix-editor input="body"></trix-editor>
+          @error('body')<p class="text-danger">{{ $message }}</p>@enderror
         </div>
 
 
-        <button type="submit" class="btn btn-primary">Create Post</button>
+        <button type="submit" class="btn btn-primary mb-5">Create Post</button>
     </form>
 </div>
 

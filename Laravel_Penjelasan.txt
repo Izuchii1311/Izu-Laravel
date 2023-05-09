@@ -1219,3 +1219,12 @@ Akan menambah tombol untuk menambahkan postingan di tampilan MyPost.
 
 
 Untuk penjelasannya dapat di lihat di source codenya.
+
+
+
+
+
+#19 Validation & Insert Post
+
+Lanjutan dari video sebelumnya, Akan memberikan validasi di controllernya
+Membuat Validasi di Controllernya dan membuat sedikit pengamanan dan tampilan jika terjadi error.
