@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use \Cviebrock\EloquentSluggable\Services\SlugService;
 
 class DashboardPostController extends Controller
@@ -100,6 +101,7 @@ class DashboardPostController extends Controller
             // kita akan menggunakan slug yang sama tanpa merubahnya.
             // 'slug' => 'required|unique:posts',
             'category_id' => 'required',
+            'image' => 'image|file|max:2048',
             'body' => 'required'
         ];
 
@@ -109,6 +111,15 @@ class DashboardPostController extends Controller
         } 
 
         $validatedData = $request->validate($rules);
+
+        if($request->file('image')){
+            // jika ada gambar baru, maka gambar yang sebelumnya dihapus
+            if ($request->oldImage) {
+                Storage::delete($request->oldImage);
+            }
+            // jika ada gambarnya maka upload gambarnya
+            $validatedData['image'] = $request->file('image')->store('post-images');
+        }
 
         $validatedData['user_id'] = auth()->user()->id;
         $validatedData['excerpt'] = Str::limit(strip_tags($request->body), 100 ); 
@@ -127,6 +138,10 @@ class DashboardPostController extends Controller
     public function destroy(Post $post)
     {
         Post::destroy($post->id);
+
+        if ($post->image) {
+            Storage::delete($post->image);
+        }
         return redirect('/dashboard/posts')->with('success', 'Post has been deleted!');
     }
 

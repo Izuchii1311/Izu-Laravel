@@ -7,7 +7,7 @@
 
 <div class="col-lg-8">
     {{-- Karena menggunakan resource maka akan otomatis mengarah ke store untuk menambah datanya karena methodnya post --}}
-    <form method="post" action="/dashboard/posts/{{ $post->slug }}" class="mb-5">
+    <form method="post" action="/dashboard/posts/{{ $post->slug }}" class="mb-5" enctype="multipart/form-data">
       @method('put')
         {{-- @csrf salah satu security milik laravel --}}
         @csrf
@@ -44,6 +44,27 @@
           </select>
         </div>
 
+        <div class="mb-3">
+          <label class="form-label" for="image">Upload Image</label>
+
+          {{-- akan menyimpan gambar lama --}}
+          <input type="hidden" name="oldImage" value="{{ $post->image }}">
+          @if($post->image)
+            {{-- Jika ada gambar sebelumnya maka akan mengambil data sebelumnya di storage --}}
+            <img src="{{ url(asset('storage/' . $post->image)) }}" class="img-preview mb-3 col-sm-5 img-fluid d-flex">
+          @else
+            <img class="img-preview mb-3 col-sm-5 img-fluid d-flex" alt="{{ $post->image }}">
+          @endif
+          
+          <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" onchange="previewImage()">
+          
+          @error('image')
+          <div class="invalid-feedback">
+            {{ $message }}
+          </div>
+          @enderror
+        </div> 
+
         {{-- trix editor untuk body, jika excerpt akan mengambil beberapa kata dari body --}}
         <div class="mb-3">
           {{-- ubah for, id. name, inputnya menjadi body --}}
@@ -78,5 +99,22 @@
   document.addEventListener('trix-file-accept', function(e) {
     e.preventDefault();
   });
+
+  // Image Preview
+  function previewImage() {
+    const image = document.querySelector('#image');                         // nama id input
+    const imgPreview = document.querySelector('.img-preview');              // nama class image
+
+    // Display the image preview
+    imgPreview.style.display = 'block';
+
+    // Get the selected image file
+    const oFReader = new FileReader();
+    oFReader.readAsDataURL(image.files[0]);
+
+    oFReader.onload = function(oFREvent) {
+      imgPreview.src = oFREvent.target.result;
+    }
+  }
 </script>
 @endsection

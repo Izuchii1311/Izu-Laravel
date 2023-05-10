@@ -38,7 +38,7 @@
         {{-- jika ada field image maka tampilkan --}}
         @if($posts[0]->image)
             <div style="max-height: 350px; overflow: hidden;">
-                <img src="  {{ asset('storage/' . $posts[0]->image) }}" class="card-img-top" alt="{{ $posts[0]->category->name }}" class="img-fluid">
+                <img src="{{ asset('storage/' . $posts[0]->image) }}" class="card-img-top img-fluid" alt="{{ $posts[0]->category->name }}">
             </div>
         @else
             <img src="https://source.unsplash.com/1200x400?{{ $posts[0]->category->name }}" class="card-img-top" alt="{{ $posts[0]->category->name }}">

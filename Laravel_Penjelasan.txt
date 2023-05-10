@@ -1445,3 +1445,113 @@ Lakukan pengecekan untuk gambar, seperti berikut
         @endif
 
 lakukan yang sama untuk di posts, post, dan menu edit data
+
+
+
+
+
+#22 Preview, Update & Delete Image.
+
+Menampilkan Preview Gambar ketika sudah mengupload gambar di dalam form.
+Dengan Menggunakan Fungsi JavaScript, edit di create.blade.php dan arahkan ke bagian image. Tambahkan code berikut
+
+	*	<label class="form-label" for="image">Upload Image</label>
+        <img class="img-preview img-fluid mb-3 col-sm-5">
+        <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" onchange="previewImage()">
+
+	Menambahkan fungsi javascript onChange="previewImage()" di dalam formnya yang dimana ketika kita sudah mengupload kan image akan ada image di atasnya dengan mengisikan srcnya oleh Javascript.
+
+	tambahkan javascript di code script paling bawah
+
+		*  	// Image Preview
+				function previewImage() {
+					const image = document.querySelector('#image');                         // nama id input
+					const imgPreview = document.querySelector('.img-preview');              // nama class image
+				
+					// Image Inline to Block
+					imgPreview.style.display = 'block';
+
+					// Ambil data gambar
+					const oFReader = new FileReader();
+					oFReader.readAsDataURL(image.files[0]);
+
+					ofReader.onload = function(oFREvent) {
+					imgPreview.src = oFREvent.target.result;
+					}
+				}
+
+	Jika sudah maka di dalam form ketika ingin menginputkan gambar akan ada preview gambar diatasnya.
+
+
+Selanjutnya Edit Image, untuk formnya jangan lupa diberikan enctype="multipart/form-data"
+Copykan untuk inputan upload gambarnya yang ada di create, dan copykan juga untuk JavaScript Preview Imagenya.
+Alangkan baiknya ketika user melakukan edit, gambar yang sebelumnya ada dan tampil, untuk melakukannya dengan cara membuat sebuah kondisi.
+
+    *	<div class="mb-3">
+			<label class="form-label" for="image">Upload Image</label>
+
+			<input type="hidden" name="oldImage" value="{{ $post->image }}">
+			@if($post->image)
+				<img src="{{ url(asset('storage/' . $post->image)) }}" class="img-preview mb-3 col-sm-5 img-fluid d-flex">
+			@else
+				<img class="img-preview mb-3 col-sm-5 img-fluid d-flex" alt="{{ $post->image }}">
+			@endif
+			
+			<input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" onchange="previewImage()">
+			
+			@error('image')
+			<div class="invalid-feedback">
+				{{ $message }}
+			</div>
+			@enderror
+        </div> 
+	
+	Untuk Image Preview di Page edit sudah selesai, namun ini belum berfungsi karena belum ada validasi di dalam controller updatenya.
+
+    *	public function update(Request $request, Post $post)
+		{
+			$rules = [
+				'title' => 'required|max:50',
+				'category_id' => 'required',
+				'image' => 'image|file|max:2048',
+				'body' => 'required'
+			];
+
+			if ($request->slug != $post->slug) {
+				$rules['slug'] = 'required|unique:posts';
+			} 
+
+			$validatedData = $request->validate($rules);
+
+			if($request->file('image')){
+				if ($request->oldImage) {
+					Storage::delete($request->oldImage);
+				}
+				$validatedData['image'] = $request->file('image')->store('post-images');
+			}
+
+			$validatedData['user_id'] = auth()->user()->id;
+			$validatedData['excerpt'] = Str::limit(strip_tags($request->body), 100 ); 
+
+			Post::where('id', $post->id)
+				->update($validatedData);
+
+			return redirect('/dashboard/posts')->with('success', 'Post has been updated!');
+
+		}
+
+	diatas kita melakukan validasi ketika melakukan upload image, kemudian juga menghapus image sebelumnya, karena jika tidak dihapus image sebelumnya akan tetap ada sehingga, menyebabkan banyaknya image di database.
+	Kemudian untuk method destroynya juga untuk melakukan penghapusan Image
+
+	*   public function destroy(Post $post)
+		{
+			Post::destroy($post->id);
+
+			if ($post->image) {
+				Storage::delete($post->image);
+			}
+			return redirect('/dashboard/posts')->with('success', 'Post has been deleted!');
+		}
+
+
+Problem Ketika User telah melakukan update, postingannya tidak berada di awal.
