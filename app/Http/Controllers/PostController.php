@@ -26,7 +26,7 @@ class PostController extends Controller
             "active" => "posts",
             // Kalo ga ada data maka langsung menampilkan semuanya saja
             // filter diambil di dalma modelnya, apapun yang ada di dalam filter lakukan
-            "posts" => Post::latest()->filter(request(['search', 'category', 'authors']))->paginate(7)->withQueryString()
+            "posts" => Post::latest('updated_at')->filter(request(['search', 'category', 'authors']))->paginate(7)->withQueryString()
         ]);
     }
 

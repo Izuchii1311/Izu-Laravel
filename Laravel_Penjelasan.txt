@@ -1555,3 +1555,229 @@ Alangkan baiknya ketika user melakukan edit, gambar yang sebelumnya ada dan tamp
 
 
 Problem Ketika User telah melakukan update, postingannya tidak berada di awal.
+
+
+
+
+
+#23 Authorization
+
+Authentication untuk login dan registrasi.
+Authorization setelah login user dapat melakukan apa? jika admin maka bisa ini, jika user biasa maka bisa ini.
+
+Mencoba hal lain, jika admin bisa mengelola kategori dibandingkan user biasa.
+
+Laravel.com/Authorization
+Laravel juga mempunyai cara sederhana untuk melakukan Authorization, dari aksi user terhadap halaman halamannya. 
+Contohnya : Meskipun user itu sudah bisa login bisa saja tidak punya hak akses ke update dan delete dari model tertentu didalam database(melihat data bisa tetapi edit dan hapus tidak bisa) - Authorization.
+
+Laravel Authorization ini menyediakan sebuah cara yang mudah, dan terorganisir untuk mengelola pemeriksaan atau pengecekkan hak akses.
+Ada 2 caranya
+Cara yang pertama dengan menggunakan gates(simpel)
+Cara yang kedua dengan menggunakan policies(kompleks)
+
+Jika menggunakan starter kit menggunakan Laravel (ZetStream atau Breeze) yang didalamnya terdapat fitur authentication dan Authorization yang dapat digunakan. Sebenarnya dibelakang layar yang mereka gunakan tetap gates and policies.
+
+Akan membuat fitur pengelolaan kategori di dalam dashboard.
+
+Membuat Controller Baru 
+	* php artisan make:controller AdminCategoryController --resource --model=Category
+
+Untuk membuat Create, Edit, dan Destroy dapat dilakukan sendiri.
+
+Selanjutnya untuk membuat routenya
+	* Route::resource('/dashboard/categories', AdminCategoryController::class)->except('show')->middleware('auth');
+
+	karena resource maka akan sudah otomatis terhubung ke method create, edit, show, delete. Namun dengan menggunakan except kita dapate melakukan pengecualian, pada method show karena tidak dipakai agar tidak bisa diakses lewat url.
+	untuk mengeceknya dapat langsung cek di web laravelnya atau dengan
+		* php artisan route:list
+
+	Lalu buat juga navigasi di sidebarnya ketika di halaman MyDashboard.
+	Namun tidak akan menambahkan <li></li> lagi karena itu akan menjadi bagian ul yang terpisah. kedepannya akan dibikin agar dia hanya bisa diakses oleh admin jadi punya ul lagi.
+	Kita akan menambahkan judul sama dengan template yang ada di bootstrap.
+
+		* 	<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 	text-muted">
+				<span>ADMINISTRATOR</span>
+			</h6>
+			<ul class="nav flex-column">
+				<li class="nav-item">
+				<a class="nav-link {{ Request::is('dashboard/categories*') ? 'active' : '' }}" href="/dashboard/categories">
+					<span data-feather="pocket" class="align-text-bottom"></span>
+					Post Categories
+				</a>
+				</li>
+			</ul>
+
+	Selanjutnya kita ubah method index untuk controllernya agar mengarah ke category/index.
+		*	return view('dashboard.categories.index', [
+				'categories' => Category::all()
+			]);
+
+	dan di dalam folder dashboard kita buat lagi folder dashboard.category.index
+	untuk tampilan index category samakan dengan index post maka dapat melakukan copy paste
+
+	Problemnya adalah user yang login bisa mengakses kategori. Padahal inginnya misalkan user Izuchii(admin) saja yang bisa melihat Post Category dan user lain tidak bisa mengaksesnya.
+
+	Maka kita akan matikan middlewarenya karena kita akan mengecek sudah login belumnya secara manual, trus jika dia sudah login dia Izuchii atau bukan.
+
+	web.php
+		*	// Route Untuk mengarah ke Controller Category
+			Route::resource('/dashboard/categories', AdminCategoryController::class)->except('show');
+
+	Maka route tersebut akan bisa dibuka oleh siapa pun, maka untuk mencegahnya kita melakukan pengkondisian di controllernya.
+	Seperti berikut :
+		*   if(!auth()->check() || auth()->user()->username !== 'izuchii3'){
+				abort(403);
+			}
+			// Maka dengan begini user selain Izuchii tidak akan bisa melihat category
+
+			return view('dashboard.categories.index', [
+				'categories' => Category::all()
+			]);
+
+	Namun sayangnya kita harus melakukan copy paste pada method yang lainnnya juga. Kita akan membuat si logika login tersebut menjadi middleware tersendiri.
+	Untuk membuat middleware
+		* php artisan make:middleware IsAdmin
+
+		maka akan dibuatkan sebuah class IsAdmin di dalam folder app/http/middleware/IsAdmin.php
+
+		di dalam middleware IsAdmin copy logic pengecekan tadi ke dalam function handle sebelum melakukan return.
+		*   public function handle(Request $request, Closure $next): Response
+			{
+				if(!auth()->check() || auth()->user()->username !== 'izuchii3'){
+					abort(403);
+				}
+				return $next($request);
+			}
+
+		namun ini belum jalan kita harus memasukkan middleware kita ke dalam kernelnya. kernel.php
+		di bagian aliases middleware tambahkan 
+		* 'admin' => \App\Http\Middleware\IsAdmin::class, 
+
+		maka di dalam routenya kita dapat memanggil middleware yang telah kita buat yaitu admin.
+			*	Route::resource('/dashboard/categories', AdminCategoryController::class)->except('show')->middleware('admin');
+
+		Maka dengan begini kita tidak perlu memberikan logic tadi di setiap method Controllernya.
+	
+Sekarang kita akan menghilangkan tampilan Post Categories ini jika dia bukan Admin.
+Disini kita baru membutuhkan fitur Authorization menggunakan gates()
+Kita akan menampilkan bagian kecil Post Categories jika dia admin, namun ini tidak akan bisa sefleksibel itu jika menggunakan middleware. Maka kita akan menggunakan Authorization gates
+
+Gates adalah sebuah cara yang bagus untuk mempelajari dasar dasar authorisasi laravel, mekipun jika membuat aplikasinya sudah cukup kompleks harus menggunakan policies(jika misalkan ada,moderator, author, admin, super admin) supaya aturan authorisasinya lebih teorganisir lagi.
+
+Cara membuat gates kita membuat sebuah function apakah seorang user itu memiliki akses untuk melakukan aksi tertentu. Umumnya method gates ini didefinisikan di dalam method boot di file App\Providers\AuthServiceProvider nanti kita membuatnya dengan sebuah Facade Gate.
+Gate ini selalu menerima instans user sebagai argumen pertamanya, jadi otomatis tau user yang lagi loginnya siapa. sehingga kita bisa membuat user yang login itu bisa ngapain aja. Bisa juga kita menambahkan argumen tambahan contohnya argument yang relevan.
+
+Sekarang buka Providers\AppServiceProvider.php dan tambahkan code berikut
+	*   public function boot(): void
+		{
+			Paginator::useBootstrap();
+
+			// Membuat gate yang namanya admin, yang dapat diakses oleh user yang usernamenya 'izuchii3'
+			// Sekarang kita jadi punya 2 authorisasi, yang pertama dengan menggunakan middleware, yang keuntungannya kita dapat melakukan authorisasi dengan method yang banyak sekaligus. Kekurangannya dia tidak fleksibel.
+			
+			
+			Gate::define('admin', function(User $user) {
+				return $user->username === 'izuchii3';
+			});
+		}
+
+	Kemudian untuk menggunakannya kita tidak lagi menggunakan middleware('admin')
+	maka di dalam routenya, yang asalnya
+	*	Route::resource('/dashboard/categories', AdminCategoryController::class)->except('show')->middleware('admin);
+	menjadi
+	*	Route::resource('/dashboard/categories', AdminCategoryController::class)->except('show');
+
+	Kemudian di dalam AdminCategoryControllernya kita cukup memanggil gate nya seperti berikut.
+	*   public function index()
+		{
+			// Pengecekan Gate 
+			$this->authorize('admin');
+			return view('dashboard.categories.index', [
+				'categories' => Category::all()
+			]);
+		}
+
+
+Dengan begini jika user selain admin tidak akan bisa masuk ke halaman Post Categories. Maka akan tampil 403 This action is Unauthorized.
+
+Kelebihan dengan menggunakan gate adalah gate bisa digunakan dimanapun
+
+Misalkan untuk controllernya kita buat menjadi seperti itu dan untuk routenya kita panggil kembali si middleware  
+	*	public function index()
+		{
+			return view('dashboard.categories.index', [
+				'categories' => Category::all()
+			]);
+		}
+
+	* Route::resource('/dashboard/categories', AdminCategoryController::class)->except('show')->middleware('admin);
+
+Maka untuk di side bar nya kita tinggal panggil blade directive @can.
+Seperti berikut
+	*   @can('admin')
+		<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+			<span>ADMINISTRATOR</span>
+		</h6>
+		<ul class="nav flex-column">
+			<li class="nav-item">
+			<a class="nav-link {{ Request::is('dashboard/categories*') ? 'active' : '' }}" href="/dashboard/categories">
+				<span data-feather="pocket" class="align-text-bottom"></span>
+				Post Categories
+			</a>
+			</li>
+		</ul>
+		@endcan
+
+Jadi kita menggabungkan. Middleware kita pakai di route, gatenya kita pakai di blade. 
+maka ul ini akan tampil jika dia admin saja, namun jika tidak maka tidak akan tampil
+
+Problem selanjutnya, bagaimana jika adminnya bertambah?
+Sebenarnya kita bisa menambahkan admin lagi di dalam logicnya, namun itu akan cukup repot. Harus melakukan edit di middleware dan Gatenya 
+Oleh karena itu bagaimana jika misalnya supaya laravel mengecek authorisasi lewat field di dalam tabel.
+Misalnya di dalam tabelnya kita menambahkan field baru yang namanya is_admin yang bertipe boolean
+
+Kita akan menyisipkan migrasi field baru, dan jangan ubah ubah untuk create_user_table.php
+Kita akan menggunaka artisan
+ctrl + shift + p >> make:migration >> add_is_admin_to_users_table >> create new table (NO). modifikasi tabel yang sudah ada (Yes) tablenya users
+
+Jika sudah maka akan ada file migrasi baru yang menambahkan is_admin ke tabel users.
+Kemudian tambahkan bariskode berikut
+
+	*   public function up(): void {
+        Schema::table('users', function (Blueprint $table) {
+            // jadi jika ingin menjadi admin kita melakukan edit manual di dalam databasenya
+            $table->boolean('is_admin')->default(false);
+			});
+		}
+
+		public function down(): void {
+			Schema::table('users', function (Blueprint $table) {
+				$table->dropColumn('is_admin');
+			});
+		}
+
+kemudian jalankan migrasinya php artisan migrate(akan menjalankan migrasi yang belum dijalankan saja).
+Dan semunya sudah diberikan is_admin di dalam databasenya dengan nilai defaultnya 0 / false.
+Untuk menjadikan admin kita secara manual melakukan edit di databasenya menjadi 1/true.
+
+Cara mengiplementasikannya di dalam AppServiceProvider.php 
+gatenya sekarang langsung memanggil is_admin seperti berikut
+
+	*	Gate::define('admin', function(User $user) {
+            return $user->is_admin;
+        });
+
+Jangan lupa di middlewarenya IsAdmin.php seperti berikut
+
+	*	public function handle(Request $request, Closure $next): Response
+		{
+			if(!auth()->check() || !auth()->user()->is_admin){
+				abort(403);
+			}
+			return $next($request);
+		}
+
+Jadi jika is_admin 0 tidak akan tampil Post Category.
+Jika is_admin 1 akan tampil Post Category.
+untuk membuat user menjadi admin di dalam databasenya kita mengubah secara manual merubah is_admin menjadi 1.
